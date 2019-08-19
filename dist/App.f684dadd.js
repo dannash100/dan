@@ -43610,1091 +43610,1686 @@ Object.defineProperty(exports, "default", {
 var _Button = _interopRequireDefault(require("./Button"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./Button":"node_modules/@material-ui/core/esm/Button/Button.js"}],"node_modules/@material-ui/system/esm/responsivePropType.js":[function(require,module,exports) {
-"use strict";
+},{"./Button":"node_modules/@material-ui/core/esm/Button/Button.js"}],"node_modules/process/browser.js":[function(require,module,exports) {
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
+// shim for using process in browser
+var process = module.exports = {}; // cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
 
-var _propTypes = _interopRequireDefault(require("prop-types"));
+var cachedSetTimeout;
+var cachedClearTimeout;
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var responsivePropType = "development" !== 'production' ? _propTypes.default.oneOfType([_propTypes.default.number, _propTypes.default.string, _propTypes.default.object, _propTypes.default.array]) : {};
-var _default = responsivePropType;
-exports.default = _default;
-},{"prop-types":"node_modules/prop-types/index.js"}],"node_modules/@material-ui/system/esm/merge.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _deepmerge = _interopRequireDefault(require("deepmerge"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// < 1kb payload overhead when lodash/merge is > 3kb.
-function merge(acc, item) {
-  if (!item) {
-    return acc;
-  }
-
-  return (0, _deepmerge.default)(acc, item, {
-    clone: false // No need to clone deep, it's way faster.
-
-  });
+function defaultSetTimout() {
+  throw new Error('setTimeout has not been defined');
 }
 
-var _default = merge;
-exports.default = _default;
-},{"deepmerge":"node_modules/deepmerge/dist/cjs.js"}],"node_modules/@material-ui/system/esm/breakpoints.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.handleBreakpoints = handleBreakpoints;
-exports.default = void 0;
-
-var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/esm/toConsumableArray"));
-
-var _extends2 = _interopRequireDefault(require("@babel/runtime/helpers/esm/extends"));
-
-var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/esm/typeof"));
-
-var _warning = _interopRequireDefault(require("warning"));
-
-var _propTypes = _interopRequireDefault(require("prop-types"));
-
-var _merge = _interopRequireDefault(require("./merge"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// The breakpoint **start** at this value.
-// For instance with the first breakpoint xs: [xs, sm[.
-var values = {
-  xs: 0,
-  sm: 600,
-  md: 960,
-  lg: 1280,
-  xl: 1920
-};
-var defaultBreakpoints = {
-  // Sorted ASC by size. That's important.
-  // It can't be configured as it's used statically for propTypes.
-  keys: ['xs', 'sm', 'md', 'lg', 'xl'],
-  up: function up(key) {
-    return "@media (min-width:".concat(values[key], "px)");
-  }
-};
-
-function handleBreakpoints(props, propValue, styleFromPropValue) {
-  "development" !== "production" ? (0, _warning.default)(props.theme, '@material-ui/system: you are calling a style function without a theme value.') : void 0;
-
-  if (Array.isArray(propValue)) {
-    var themeBreakpoints = props.theme.breakpoints || defaultBreakpoints;
-    return propValue.reduce(function (acc, item, index) {
-      acc[themeBreakpoints.up(themeBreakpoints.keys[index])] = styleFromPropValue(propValue[index]);
-      return acc;
-    }, {});
-  }
-
-  if ((0, _typeof2.default)(propValue) === 'object') {
-    var _themeBreakpoints = props.theme.breakpoints || defaultBreakpoints;
-
-    return Object.keys(propValue).reduce(function (acc, breakpoint) {
-      acc[_themeBreakpoints.up(breakpoint)] = styleFromPropValue(propValue[breakpoint]);
-      return acc;
-    }, {});
-  }
-
-  var output = styleFromPropValue(propValue);
-  return output;
+function defaultClearTimeout() {
+  throw new Error('clearTimeout has not been defined');
 }
 
-function breakpoints(styleFunction) {
-  var newStyleFunction = function newStyleFunction(props) {
-    var base = styleFunction(props);
-    var themeBreakpoints = props.theme.breakpoints || defaultBreakpoints;
-    var extended = themeBreakpoints.keys.reduce(function (acc, key) {
-      if (props[key]) {
-        acc = acc || {};
-        acc[themeBreakpoints.up(key)] = styleFunction((0, _extends2.default)({
-          theme: props.theme
-        }, props[key]));
+(function () {
+  try {
+    if (typeof setTimeout === 'function') {
+      cachedSetTimeout = setTimeout;
+    } else {
+      cachedSetTimeout = defaultSetTimout;
+    }
+  } catch (e) {
+    cachedSetTimeout = defaultSetTimout;
+  }
+
+  try {
+    if (typeof clearTimeout === 'function') {
+      cachedClearTimeout = clearTimeout;
+    } else {
+      cachedClearTimeout = defaultClearTimeout;
+    }
+  } catch (e) {
+    cachedClearTimeout = defaultClearTimeout;
+  }
+})();
+
+function runTimeout(fun) {
+  if (cachedSetTimeout === setTimeout) {
+    //normal enviroments in sane situations
+    return setTimeout(fun, 0);
+  } // if setTimeout wasn't available but was latter defined
+
+
+  if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+    cachedSetTimeout = setTimeout;
+    return setTimeout(fun, 0);
+  }
+
+  try {
+    // when when somebody has screwed with setTimeout but no I.E. maddness
+    return cachedSetTimeout(fun, 0);
+  } catch (e) {
+    try {
+      // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+      return cachedSetTimeout.call(null, fun, 0);
+    } catch (e) {
+      // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+      return cachedSetTimeout.call(this, fun, 0);
+    }
+  }
+}
+
+function runClearTimeout(marker) {
+  if (cachedClearTimeout === clearTimeout) {
+    //normal enviroments in sane situations
+    return clearTimeout(marker);
+  } // if clearTimeout wasn't available but was latter defined
+
+
+  if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+    cachedClearTimeout = clearTimeout;
+    return clearTimeout(marker);
+  }
+
+  try {
+    // when when somebody has screwed with setTimeout but no I.E. maddness
+    return cachedClearTimeout(marker);
+  } catch (e) {
+    try {
+      // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+      return cachedClearTimeout.call(null, marker);
+    } catch (e) {
+      // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+      // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+      return cachedClearTimeout.call(this, marker);
+    }
+  }
+}
+
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+  if (!draining || !currentQueue) {
+    return;
+  }
+
+  draining = false;
+
+  if (currentQueue.length) {
+    queue = currentQueue.concat(queue);
+  } else {
+    queueIndex = -1;
+  }
+
+  if (queue.length) {
+    drainQueue();
+  }
+}
+
+function drainQueue() {
+  if (draining) {
+    return;
+  }
+
+  var timeout = runTimeout(cleanUpNextTick);
+  draining = true;
+  var len = queue.length;
+
+  while (len) {
+    currentQueue = queue;
+    queue = [];
+
+    while (++queueIndex < len) {
+      if (currentQueue) {
+        currentQueue[queueIndex].run();
       }
-
-      return acc;
-    }, null);
-    return (0, _merge.default)(base, extended);
-  };
-
-  newStyleFunction.propTypes = "development" !== 'production' ? (0, _extends2.default)({}, styleFunction.propTypes, {
-    xs: _propTypes.default.object,
-    sm: _propTypes.default.object,
-    md: _propTypes.default.object,
-    lg: _propTypes.default.object,
-    xl: _propTypes.default.object
-  }) : {};
-  newStyleFunction.filterProps = ['xs', 'sm', 'md', 'lg', 'xl'].concat((0, _toConsumableArray2.default)(styleFunction.filterProps));
-  return newStyleFunction;
-}
-
-var _default = breakpoints;
-exports.default = _default;
-},{"@babel/runtime/helpers/esm/toConsumableArray":"node_modules/@babel/runtime/helpers/esm/toConsumableArray.js","@babel/runtime/helpers/esm/extends":"node_modules/@babel/runtime/helpers/esm/extends.js","@babel/runtime/helpers/esm/typeof":"node_modules/@babel/runtime/helpers/esm/typeof.js","warning":"node_modules/warning/warning.js","prop-types":"node_modules/prop-types/index.js","./merge":"node_modules/@material-ui/system/esm/merge.js"}],"node_modules/@material-ui/system/esm/style.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/esm/defineProperty"));
-
-var _responsivePropType = _interopRequireDefault(require("./responsivePropType"));
-
-var _breakpoints = require("./breakpoints");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function getPath(obj, path) {
-  if (!path || typeof path !== 'string') {
-    return null;
-  }
-
-  return path.split('.').reduce(function (acc, item) {
-    return acc && acc[item] ? acc[item] : null;
-  }, obj);
-}
-
-function style(options) {
-  var prop = options.prop,
-      _options$cssProperty = options.cssProperty,
-      cssProperty = _options$cssProperty === void 0 ? options.prop : _options$cssProperty,
-      themeKey = options.themeKey,
-      transform = options.transform;
-
-  var fn = function fn(props) {
-    if (props[prop] == null) {
-      return null;
     }
 
-    var propValue = props[prop];
-    var theme = props.theme;
-    var themeMapping = getPath(theme, themeKey) || {};
+    queueIndex = -1;
+    len = queue.length;
+  }
 
-    var styleFromPropValue = function styleFromPropValue(propValueFinal) {
-      var value;
+  currentQueue = null;
+  draining = false;
+  runClearTimeout(timeout);
+}
 
-      if (typeof themeMapping === 'function') {
-        value = themeMapping(propValueFinal);
-      } else if (Array.isArray(themeMapping)) {
-        value = themeMapping[propValueFinal];
-      } else {
-        value = getPath(themeMapping, propValueFinal) || propValueFinal;
+process.nextTick = function (fun) {
+  var args = new Array(arguments.length - 1);
 
-        if (transform) {
-          value = transform(value);
+  if (arguments.length > 1) {
+    for (var i = 1; i < arguments.length; i++) {
+      args[i - 1] = arguments[i];
+    }
+  }
+
+  queue.push(new Item(fun, args));
+
+  if (queue.length === 1 && !draining) {
+    runTimeout(drainQueue);
+  }
+}; // v8 likes predictible objects
+
+
+function Item(fun, array) {
+  this.fun = fun;
+  this.array = array;
+}
+
+Item.prototype.run = function () {
+  this.fun.apply(null, this.array);
+};
+
+process.title = 'browser';
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) {
+  return [];
+};
+
+process.binding = function (name) {
+  throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () {
+  return '/';
+};
+
+process.chdir = function (dir) {
+  throw new Error('process.chdir is not supported');
+};
+
+process.umask = function () {
+  return 0;
+};
+},{}],"node_modules/parallax-js/dist/parallax.js":[function(require,module,exports) {
+var define;
+var global = arguments[3];
+var process = require("process");
+(function (f) {
+  if (typeof exports === "object" && typeof module !== "undefined") {
+    module.exports = f();
+  } else if (typeof define === "function" && define.amd) {
+    define([], f);
+  } else {
+    var g;
+
+    if (typeof window !== "undefined") {
+      g = window;
+    } else if (typeof global !== "undefined") {
+      g = global;
+    } else if (typeof self !== "undefined") {
+      g = self;
+    } else {
+      g = this;
+    }
+
+    g.Parallax = f();
+  }
+})(function () {
+  var define, module, exports;
+  return function e(t, n, r) {
+    function s(o, u) {
+      if (!n[o]) {
+        if (!t[o]) {
+          var a = typeof require == "function" && require;
+          if (!u && a) return a(o, !0);
+          if (i) return i(o, !0);
+          var f = new Error("Cannot find module '" + o + "'");
+          throw f.code = "MODULE_NOT_FOUND", f;
+        }
+
+        var l = n[o] = {
+          exports: {}
+        };
+        t[o][0].call(l.exports, function (e) {
+          var n = t[o][1][e];
+          return s(n ? n : e);
+        }, l, l.exports, e, t, n, r);
+      }
+
+      return n[o].exports;
+    }
+
+    var i = typeof require == "function" && require;
+
+    for (var o = 0; o < r.length; o++) s(r[o]);
+
+    return s;
+  }({
+    1: [function (require, module, exports) {
+      /*
+      object-assign
+      (c) Sindre Sorhus
+      @license MIT
+      */
+      'use strict';
+      /* eslint-disable no-unused-vars */
+
+      var getOwnPropertySymbols = Object.getOwnPropertySymbols;
+      var hasOwnProperty = Object.prototype.hasOwnProperty;
+      var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+
+      function toObject(val) {
+        if (val === null || val === undefined) {
+          throw new TypeError('Object.assign cannot be called with null or undefined');
+        }
+
+        return Object(val);
+      }
+
+      function shouldUseNative() {
+        try {
+          if (!Object.assign) {
+            return false;
+          } // Detect buggy property enumeration order in older V8 versions.
+          // https://bugs.chromium.org/p/v8/issues/detail?id=4118
+
+
+          var test1 = new String('abc'); // eslint-disable-line no-new-wrappers
+
+          test1[5] = 'de';
+
+          if (Object.getOwnPropertyNames(test1)[0] === '5') {
+            return false;
+          } // https://bugs.chromium.org/p/v8/issues/detail?id=3056
+
+
+          var test2 = {};
+
+          for (var i = 0; i < 10; i++) {
+            test2['_' + String.fromCharCode(i)] = i;
+          }
+
+          var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+            return test2[n];
+          });
+
+          if (order2.join('') !== '0123456789') {
+            return false;
+          } // https://bugs.chromium.org/p/v8/issues/detail?id=3056
+
+
+          var test3 = {};
+          'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+            test3[letter] = letter;
+          });
+
+          if (Object.keys(Object.assign({}, test3)).join('') !== 'abcdefghijklmnopqrst') {
+            return false;
+          }
+
+          return true;
+        } catch (err) {
+          // We don't expect any of the above to throw, but better to be safe.
+          return false;
         }
       }
 
-      if (cssProperty === false) {
-        return value;
+      module.exports = shouldUseNative() ? Object.assign : function (target, source) {
+        var from;
+        var to = toObject(target);
+        var symbols;
+
+        for (var s = 1; s < arguments.length; s++) {
+          from = Object(arguments[s]);
+
+          for (var key in from) {
+            if (hasOwnProperty.call(from, key)) {
+              to[key] = from[key];
+            }
+          }
+
+          if (getOwnPropertySymbols) {
+            symbols = getOwnPropertySymbols(from);
+
+            for (var i = 0; i < symbols.length; i++) {
+              if (propIsEnumerable.call(from, symbols[i])) {
+                to[symbols[i]] = from[symbols[i]];
+              }
+            }
+          }
+        }
+
+        return to;
+      };
+    }, {}],
+    2: [function (require, module, exports) {
+      (function (process) {
+        // Generated by CoffeeScript 1.12.2
+        (function () {
+          var getNanoSeconds, hrtime, loadTime, moduleLoadTime, nodeLoadTime, upTime;
+
+          if (typeof performance !== "undefined" && performance !== null && performance.now) {
+            module.exports = function () {
+              return performance.now();
+            };
+          } else if (typeof process !== "undefined" && process !== null && process.hrtime) {
+            module.exports = function () {
+              return (getNanoSeconds() - nodeLoadTime) / 1e6;
+            };
+
+            hrtime = process.hrtime;
+
+            getNanoSeconds = function () {
+              var hr;
+              hr = hrtime();
+              return hr[0] * 1e9 + hr[1];
+            };
+
+            moduleLoadTime = getNanoSeconds();
+            upTime = process.uptime() * 1e9;
+            nodeLoadTime = moduleLoadTime - upTime;
+          } else if (Date.now) {
+            module.exports = function () {
+              return Date.now() - loadTime;
+            };
+
+            loadTime = Date.now();
+          } else {
+            module.exports = function () {
+              return new Date().getTime() - loadTime;
+            };
+
+            loadTime = new Date().getTime();
+          }
+        }).call(this);
+      }).call(this, require('_process'));
+    }, {
+      "_process": 3
+    }],
+    3: [function (require, module, exports) {
+      // shim for using process in browser
+      var process = module.exports = {}; // cached from whatever global is present so that test runners that stub it
+      // don't break things.  But we need to wrap it in a try catch in case it is
+      // wrapped in strict mode code which doesn't define any globals.  It's inside a
+      // function because try/catches deoptimize in certain engines.
+
+      var cachedSetTimeout;
+      var cachedClearTimeout;
+
+      function defaultSetTimout() {
+        throw new Error('setTimeout has not been defined');
       }
 
-      return (0, _defineProperty2.default)({}, cssProperty, value);
-    };
+      function defaultClearTimeout() {
+        throw new Error('clearTimeout has not been defined');
+      }
 
-    return (0, _breakpoints.handleBreakpoints)(props, propValue, styleFromPropValue);
+      (function () {
+        try {
+          if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+          } else {
+            cachedSetTimeout = defaultSetTimout;
+          }
+        } catch (e) {
+          cachedSetTimeout = defaultSetTimout;
+        }
+
+        try {
+          if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+          } else {
+            cachedClearTimeout = defaultClearTimeout;
+          }
+        } catch (e) {
+          cachedClearTimeout = defaultClearTimeout;
+        }
+      })();
+
+      function runTimeout(fun) {
+        if (cachedSetTimeout === setTimeout) {
+          //normal enviroments in sane situations
+          return setTimeout(fun, 0);
+        } // if setTimeout wasn't available but was latter defined
+
+
+        if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+          cachedSetTimeout = setTimeout;
+          return setTimeout(fun, 0);
+        }
+
+        try {
+          // when when somebody has screwed with setTimeout but no I.E. maddness
+          return cachedSetTimeout(fun, 0);
+        } catch (e) {
+          try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+          } catch (e) {
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+          }
+        }
+      }
+
+      function runClearTimeout(marker) {
+        if (cachedClearTimeout === clearTimeout) {
+          //normal enviroments in sane situations
+          return clearTimeout(marker);
+        } // if clearTimeout wasn't available but was latter defined
+
+
+        if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+          cachedClearTimeout = clearTimeout;
+          return clearTimeout(marker);
+        }
+
+        try {
+          // when when somebody has screwed with setTimeout but no I.E. maddness
+          return cachedClearTimeout(marker);
+        } catch (e) {
+          try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+          } catch (e) {
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+          }
+        }
+      }
+
+      var queue = [];
+      var draining = false;
+      var currentQueue;
+      var queueIndex = -1;
+
+      function cleanUpNextTick() {
+        if (!draining || !currentQueue) {
+          return;
+        }
+
+        draining = false;
+
+        if (currentQueue.length) {
+          queue = currentQueue.concat(queue);
+        } else {
+          queueIndex = -1;
+        }
+
+        if (queue.length) {
+          drainQueue();
+        }
+      }
+
+      function drainQueue() {
+        if (draining) {
+          return;
+        }
+
+        var timeout = runTimeout(cleanUpNextTick);
+        draining = true;
+        var len = queue.length;
+
+        while (len) {
+          currentQueue = queue;
+          queue = [];
+
+          while (++queueIndex < len) {
+            if (currentQueue) {
+              currentQueue[queueIndex].run();
+            }
+          }
+
+          queueIndex = -1;
+          len = queue.length;
+        }
+
+        currentQueue = null;
+        draining = false;
+        runClearTimeout(timeout);
+      }
+
+      process.nextTick = function (fun) {
+        var args = new Array(arguments.length - 1);
+
+        if (arguments.length > 1) {
+          for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+          }
+        }
+
+        queue.push(new Item(fun, args));
+
+        if (queue.length === 1 && !draining) {
+          runTimeout(drainQueue);
+        }
+      }; // v8 likes predictible objects
+
+
+      function Item(fun, array) {
+        this.fun = fun;
+        this.array = array;
+      }
+
+      Item.prototype.run = function () {
+        this.fun.apply(null, this.array);
+      };
+
+      process.title = 'browser';
+      process.env = {};
+      process.argv = [];
+      process.version = ''; // empty string to avoid regexp issues
+
+      process.versions = {};
+
+      function noop() {}
+
+      process.on = noop;
+      process.addListener = noop;
+      process.once = noop;
+      process.off = noop;
+      process.removeListener = noop;
+      process.removeAllListeners = noop;
+      process.emit = noop;
+      process.prependListener = noop;
+      process.prependOnceListener = noop;
+
+      process.listeners = function (name) {
+        return [];
+      };
+
+      process.binding = function (name) {
+        throw new Error('process.binding is not supported');
+      };
+
+      process.cwd = function () {
+        return '/';
+      };
+
+      process.chdir = function (dir) {
+        throw new Error('process.chdir is not supported');
+      };
+
+      process.umask = function () {
+        return 0;
+      };
+    }, {}],
+    4: [function (require, module, exports) {
+      (function (global) {
+        var now = require('performance-now'),
+            root = typeof window === 'undefined' ? global : window,
+            vendors = ['moz', 'webkit'],
+            suffix = 'AnimationFrame',
+            raf = root['request' + suffix],
+            caf = root['cancel' + suffix] || root['cancelRequest' + suffix];
+
+        for (var i = 0; !raf && i < vendors.length; i++) {
+          raf = root[vendors[i] + 'Request' + suffix];
+          caf = root[vendors[i] + 'Cancel' + suffix] || root[vendors[i] + 'CancelRequest' + suffix];
+        } // Some versions of FF have rAF but not cAF
+
+
+        if (!raf || !caf) {
+          var last = 0,
+              id = 0,
+              queue = [],
+              frameDuration = 1000 / 60;
+
+          raf = function (callback) {
+            if (queue.length === 0) {
+              var _now = now(),
+                  next = Math.max(0, frameDuration - (_now - last));
+
+              last = next + _now;
+              setTimeout(function () {
+                var cp = queue.slice(0); // Clear queue here to prevent
+                // callbacks from appending listeners
+                // to the current frame's queue
+
+                queue.length = 0;
+
+                for (var i = 0; i < cp.length; i++) {
+                  if (!cp[i].cancelled) {
+                    try {
+                      cp[i].callback(last);
+                    } catch (e) {
+                      setTimeout(function () {
+                        throw e;
+                      }, 0);
+                    }
+                  }
+                }
+              }, Math.round(next));
+            }
+
+            queue.push({
+              handle: ++id,
+              callback: callback,
+              cancelled: false
+            });
+            return id;
+          };
+
+          caf = function (handle) {
+            for (var i = 0; i < queue.length; i++) {
+              if (queue[i].handle === handle) {
+                queue[i].cancelled = true;
+              }
+            }
+          };
+        }
+
+        module.exports = function (fn) {
+          // Wrap in a new function to prevent
+          // `cancel` potentially being assigned
+          // to the native rAF function
+          return raf.call(root, fn);
+        };
+
+        module.exports.cancel = function () {
+          caf.apply(root, arguments);
+        };
+
+        module.exports.polyfill = function () {
+          root.requestAnimationFrame = raf;
+          root.cancelAnimationFrame = caf;
+        };
+      }).call(this, typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {});
+    }, {
+      "performance-now": 2
+    }],
+    5: [function (require, module, exports) {
+      'use strict';
+
+      var _createClass = function () {
+        function defineProperties(target, props) {
+          for (var i = 0; i < props.length; i++) {
+            var descriptor = props[i];
+            descriptor.enumerable = descriptor.enumerable || false;
+            descriptor.configurable = true;
+            if ("value" in descriptor) descriptor.writable = true;
+            Object.defineProperty(target, descriptor.key, descriptor);
+          }
+        }
+
+        return function (Constructor, protoProps, staticProps) {
+          if (protoProps) defineProperties(Constructor.prototype, protoProps);
+          if (staticProps) defineProperties(Constructor, staticProps);
+          return Constructor;
+        };
+      }();
+
+      function _classCallCheck(instance, Constructor) {
+        if (!(instance instanceof Constructor)) {
+          throw new TypeError("Cannot call a class as a function");
+        }
+      }
+      /**
+      * Parallax.js
+      * @author Matthew Wagerfield - @wagerfield, René Roth - mail@reneroth.org
+      * @description Creates a parallax effect between an array of layers,
+      *              driving the motion from the gyroscope output of a smartdevice.
+      *              If no gyroscope is available, the cursor position is used.
+      */
+
+
+      var rqAnFr = require('raf');
+
+      var objectAssign = require('object-assign');
+
+      var helpers = {
+        propertyCache: {},
+        vendors: [null, ['-webkit-', 'webkit'], ['-moz-', 'Moz'], ['-o-', 'O'], ['-ms-', 'ms']],
+        clamp: function clamp(value, min, max) {
+          return min < max ? value < min ? min : value > max ? max : value : value < max ? max : value > min ? min : value;
+        },
+        data: function data(element, name) {
+          return helpers.deserialize(element.getAttribute('data-' + name));
+        },
+        deserialize: function deserialize(value) {
+          if (value === 'true') {
+            return true;
+          } else if (value === 'false') {
+            return false;
+          } else if (value === 'null') {
+            return null;
+          } else if (!isNaN(parseFloat(value)) && isFinite(value)) {
+            return parseFloat(value);
+          } else {
+            return value;
+          }
+        },
+        camelCase: function camelCase(value) {
+          return value.replace(/-+(.)?/g, function (match, character) {
+            return character ? character.toUpperCase() : '';
+          });
+        },
+        accelerate: function accelerate(element) {
+          helpers.css(element, 'transform', 'translate3d(0,0,0) rotate(0.0001deg)');
+          helpers.css(element, 'transform-style', 'preserve-3d');
+          helpers.css(element, 'backface-visibility', 'hidden');
+        },
+        transformSupport: function transformSupport(value) {
+          var element = document.createElement('div'),
+              propertySupport = false,
+              propertyValue = null,
+              featureSupport = false,
+              cssProperty = null,
+              jsProperty = null;
+
+          for (var i = 0, l = helpers.vendors.length; i < l; i++) {
+            if (helpers.vendors[i] !== null) {
+              cssProperty = helpers.vendors[i][0] + 'transform';
+              jsProperty = helpers.vendors[i][1] + 'Transform';
+            } else {
+              cssProperty = 'transform';
+              jsProperty = 'transform';
+            }
+
+            if (element.style[jsProperty] !== undefined) {
+              propertySupport = true;
+              break;
+            }
+          }
+
+          switch (value) {
+            case '2D':
+              featureSupport = propertySupport;
+              break;
+
+            case '3D':
+              if (propertySupport) {
+                var body = document.body || document.createElement('body'),
+                    documentElement = document.documentElement,
+                    documentOverflow = documentElement.style.overflow,
+                    isCreatedBody = false;
+
+                if (!document.body) {
+                  isCreatedBody = true;
+                  documentElement.style.overflow = 'hidden';
+                  documentElement.appendChild(body);
+                  body.style.overflow = 'hidden';
+                  body.style.background = '';
+                }
+
+                body.appendChild(element);
+                element.style[jsProperty] = 'translate3d(1px,1px,1px)';
+                propertyValue = window.getComputedStyle(element).getPropertyValue(cssProperty);
+                featureSupport = propertyValue !== undefined && propertyValue.length > 0 && propertyValue !== 'none';
+                documentElement.style.overflow = documentOverflow;
+                body.removeChild(element);
+
+                if (isCreatedBody) {
+                  body.removeAttribute('style');
+                  body.parentNode.removeChild(body);
+                }
+              }
+
+              break;
+          }
+
+          return featureSupport;
+        },
+        css: function css(element, property, value) {
+          var jsProperty = helpers.propertyCache[property];
+
+          if (!jsProperty) {
+            for (var i = 0, l = helpers.vendors.length; i < l; i++) {
+              if (helpers.vendors[i] !== null) {
+                jsProperty = helpers.camelCase(helpers.vendors[i][1] + '-' + property);
+              } else {
+                jsProperty = property;
+              }
+
+              if (element.style[jsProperty] !== undefined) {
+                helpers.propertyCache[property] = jsProperty;
+                break;
+              }
+            }
+          }
+
+          element.style[jsProperty] = value;
+        }
+      };
+      var MAGIC_NUMBER = 30,
+          DEFAULTS = {
+        relativeInput: false,
+        clipRelativeInput: false,
+        inputElement: null,
+        hoverOnly: false,
+        calibrationThreshold: 100,
+        calibrationDelay: 500,
+        supportDelay: 500,
+        calibrateX: false,
+        calibrateY: true,
+        invertX: true,
+        invertY: true,
+        limitX: false,
+        limitY: false,
+        scalarX: 10.0,
+        scalarY: 10.0,
+        frictionX: 0.1,
+        frictionY: 0.1,
+        originX: 0.5,
+        originY: 0.5,
+        pointerEvents: false,
+        precision: 1,
+        onReady: null,
+        selector: null
+      };
+
+      var Parallax = function () {
+        function Parallax(element, options) {
+          _classCallCheck(this, Parallax);
+
+          this.element = element;
+          var data = {
+            calibrateX: helpers.data(this.element, 'calibrate-x'),
+            calibrateY: helpers.data(this.element, 'calibrate-y'),
+            invertX: helpers.data(this.element, 'invert-x'),
+            invertY: helpers.data(this.element, 'invert-y'),
+            limitX: helpers.data(this.element, 'limit-x'),
+            limitY: helpers.data(this.element, 'limit-y'),
+            scalarX: helpers.data(this.element, 'scalar-x'),
+            scalarY: helpers.data(this.element, 'scalar-y'),
+            frictionX: helpers.data(this.element, 'friction-x'),
+            frictionY: helpers.data(this.element, 'friction-y'),
+            originX: helpers.data(this.element, 'origin-x'),
+            originY: helpers.data(this.element, 'origin-y'),
+            pointerEvents: helpers.data(this.element, 'pointer-events'),
+            precision: helpers.data(this.element, 'precision'),
+            relativeInput: helpers.data(this.element, 'relative-input'),
+            clipRelativeInput: helpers.data(this.element, 'clip-relative-input'),
+            hoverOnly: helpers.data(this.element, 'hover-only'),
+            inputElement: document.querySelector(helpers.data(this.element, 'input-element')),
+            selector: helpers.data(this.element, 'selector')
+          };
+
+          for (var key in data) {
+            if (data[key] === null) {
+              delete data[key];
+            }
+          }
+
+          objectAssign(this, DEFAULTS, data, options);
+
+          if (!this.inputElement) {
+            this.inputElement = this.element;
+          }
+
+          this.calibrationTimer = null;
+          this.calibrationFlag = true;
+          this.enabled = false;
+          this.depthsX = [];
+          this.depthsY = [];
+          this.raf = null;
+          this.bounds = null;
+          this.elementPositionX = 0;
+          this.elementPositionY = 0;
+          this.elementWidth = 0;
+          this.elementHeight = 0;
+          this.elementCenterX = 0;
+          this.elementCenterY = 0;
+          this.elementRangeX = 0;
+          this.elementRangeY = 0;
+          this.calibrationX = 0;
+          this.calibrationY = 0;
+          this.inputX = 0;
+          this.inputY = 0;
+          this.motionX = 0;
+          this.motionY = 0;
+          this.velocityX = 0;
+          this.velocityY = 0;
+          this.onMouseMove = this.onMouseMove.bind(this);
+          this.onDeviceOrientation = this.onDeviceOrientation.bind(this);
+          this.onDeviceMotion = this.onDeviceMotion.bind(this);
+          this.onOrientationTimer = this.onOrientationTimer.bind(this);
+          this.onMotionTimer = this.onMotionTimer.bind(this);
+          this.onCalibrationTimer = this.onCalibrationTimer.bind(this);
+          this.onAnimationFrame = this.onAnimationFrame.bind(this);
+          this.onWindowResize = this.onWindowResize.bind(this);
+          this.windowWidth = null;
+          this.windowHeight = null;
+          this.windowCenterX = null;
+          this.windowCenterY = null;
+          this.windowRadiusX = null;
+          this.windowRadiusY = null;
+          this.portrait = false;
+          this.desktop = !navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry|BB10|mobi|tablet|opera mini|nexus 7)/i);
+          this.motionSupport = !!window.DeviceMotionEvent && !this.desktop;
+          this.orientationSupport = !!window.DeviceOrientationEvent && !this.desktop;
+          this.orientationStatus = 0;
+          this.motionStatus = 0;
+          this.initialise();
+        }
+
+        _createClass(Parallax, [{
+          key: 'initialise',
+          value: function initialise() {
+            if (this.transform2DSupport === undefined) {
+              this.transform2DSupport = helpers.transformSupport('2D');
+              this.transform3DSupport = helpers.transformSupport('3D');
+            } // Configure Context Styles
+
+
+            if (this.transform3DSupport) {
+              helpers.accelerate(this.element);
+            }
+
+            var style = window.getComputedStyle(this.element);
+
+            if (style.getPropertyValue('position') === 'static') {
+              this.element.style.position = 'relative';
+            } // Pointer events
+
+
+            if (!this.pointerEvents) {
+              this.element.style.pointerEvents = 'none';
+            } // Setup
+
+
+            this.updateLayers();
+            this.updateDimensions();
+            this.enable();
+            this.queueCalibration(this.calibrationDelay);
+          }
+        }, {
+          key: 'doReadyCallback',
+          value: function doReadyCallback() {
+            if (this.onReady) {
+              this.onReady();
+            }
+          }
+        }, {
+          key: 'updateLayers',
+          value: function updateLayers() {
+            if (this.selector) {
+              this.layers = this.element.querySelectorAll(this.selector);
+            } else {
+              this.layers = this.element.children;
+            }
+
+            if (!this.layers.length) {
+              console.warn('ParallaxJS: Your scene does not have any layers.');
+            }
+
+            this.depthsX = [];
+            this.depthsY = [];
+
+            for (var index = 0; index < this.layers.length; index++) {
+              var layer = this.layers[index];
+
+              if (this.transform3DSupport) {
+                helpers.accelerate(layer);
+              }
+
+              layer.style.position = index ? 'absolute' : 'relative';
+              layer.style.display = 'block';
+              layer.style.left = 0;
+              layer.style.top = 0;
+              var depth = helpers.data(layer, 'depth') || 0;
+              this.depthsX.push(helpers.data(layer, 'depth-x') || depth);
+              this.depthsY.push(helpers.data(layer, 'depth-y') || depth);
+            }
+          }
+        }, {
+          key: 'updateDimensions',
+          value: function updateDimensions() {
+            this.windowWidth = window.innerWidth;
+            this.windowHeight = window.innerHeight;
+            this.windowCenterX = this.windowWidth * this.originX;
+            this.windowCenterY = this.windowHeight * this.originY;
+            this.windowRadiusX = Math.max(this.windowCenterX, this.windowWidth - this.windowCenterX);
+            this.windowRadiusY = Math.max(this.windowCenterY, this.windowHeight - this.windowCenterY);
+          }
+        }, {
+          key: 'updateBounds',
+          value: function updateBounds() {
+            this.bounds = this.inputElement.getBoundingClientRect();
+            this.elementPositionX = this.bounds.left;
+            this.elementPositionY = this.bounds.top;
+            this.elementWidth = this.bounds.width;
+            this.elementHeight = this.bounds.height;
+            this.elementCenterX = this.elementWidth * this.originX;
+            this.elementCenterY = this.elementHeight * this.originY;
+            this.elementRangeX = Math.max(this.elementCenterX, this.elementWidth - this.elementCenterX);
+            this.elementRangeY = Math.max(this.elementCenterY, this.elementHeight - this.elementCenterY);
+          }
+        }, {
+          key: 'queueCalibration',
+          value: function queueCalibration(delay) {
+            clearTimeout(this.calibrationTimer);
+            this.calibrationTimer = setTimeout(this.onCalibrationTimer, delay);
+          }
+        }, {
+          key: 'enable',
+          value: function enable() {
+            if (this.enabled) {
+              return;
+            }
+
+            this.enabled = true;
+
+            if (this.orientationSupport) {
+              this.portrait = false;
+              window.addEventListener('deviceorientation', this.onDeviceOrientation);
+              this.detectionTimer = setTimeout(this.onOrientationTimer, this.supportDelay);
+            } else if (this.motionSupport) {
+              this.portrait = false;
+              window.addEventListener('devicemotion', this.onDeviceMotion);
+              this.detectionTimer = setTimeout(this.onMotionTimer, this.supportDelay);
+            } else {
+              this.calibrationX = 0;
+              this.calibrationY = 0;
+              this.portrait = false;
+              window.addEventListener('mousemove', this.onMouseMove);
+              this.doReadyCallback();
+            }
+
+            window.addEventListener('resize', this.onWindowResize);
+            this.raf = rqAnFr(this.onAnimationFrame);
+          }
+        }, {
+          key: 'disable',
+          value: function disable() {
+            if (!this.enabled) {
+              return;
+            }
+
+            this.enabled = false;
+
+            if (this.orientationSupport) {
+              window.removeEventListener('deviceorientation', this.onDeviceOrientation);
+            } else if (this.motionSupport) {
+              window.removeEventListener('devicemotion', this.onDeviceMotion);
+            } else {
+              window.removeEventListener('mousemove', this.onMouseMove);
+            }
+
+            window.removeEventListener('resize', this.onWindowResize);
+            rqAnFr.cancel(this.raf);
+          }
+        }, {
+          key: 'calibrate',
+          value: function calibrate(x, y) {
+            this.calibrateX = x === undefined ? this.calibrateX : x;
+            this.calibrateY = y === undefined ? this.calibrateY : y;
+          }
+        }, {
+          key: 'invert',
+          value: function invert(x, y) {
+            this.invertX = x === undefined ? this.invertX : x;
+            this.invertY = y === undefined ? this.invertY : y;
+          }
+        }, {
+          key: 'friction',
+          value: function friction(x, y) {
+            this.frictionX = x === undefined ? this.frictionX : x;
+            this.frictionY = y === undefined ? this.frictionY : y;
+          }
+        }, {
+          key: 'scalar',
+          value: function scalar(x, y) {
+            this.scalarX = x === undefined ? this.scalarX : x;
+            this.scalarY = y === undefined ? this.scalarY : y;
+          }
+        }, {
+          key: 'limit',
+          value: function limit(x, y) {
+            this.limitX = x === undefined ? this.limitX : x;
+            this.limitY = y === undefined ? this.limitY : y;
+          }
+        }, {
+          key: 'origin',
+          value: function origin(x, y) {
+            this.originX = x === undefined ? this.originX : x;
+            this.originY = y === undefined ? this.originY : y;
+          }
+        }, {
+          key: 'setInputElement',
+          value: function setInputElement(element) {
+            this.inputElement = element;
+            this.updateDimensions();
+          }
+        }, {
+          key: 'setPosition',
+          value: function setPosition(element, x, y) {
+            x = x.toFixed(this.precision) + 'px';
+            y = y.toFixed(this.precision) + 'px';
+
+            if (this.transform3DSupport) {
+              helpers.css(element, 'transform', 'translate3d(' + x + ',' + y + ',0)');
+            } else if (this.transform2DSupport) {
+              helpers.css(element, 'transform', 'translate(' + x + ',' + y + ')');
+            } else {
+              element.style.left = x;
+              element.style.top = y;
+            }
+          }
+        }, {
+          key: 'onOrientationTimer',
+          value: function onOrientationTimer() {
+            if (this.orientationSupport && this.orientationStatus === 0) {
+              this.disable();
+              this.orientationSupport = false;
+              this.enable();
+            } else {
+              this.doReadyCallback();
+            }
+          }
+        }, {
+          key: 'onMotionTimer',
+          value: function onMotionTimer() {
+            if (this.motionSupport && this.motionStatus === 0) {
+              this.disable();
+              this.motionSupport = false;
+              this.enable();
+            } else {
+              this.doReadyCallback();
+            }
+          }
+        }, {
+          key: 'onCalibrationTimer',
+          value: function onCalibrationTimer() {
+            this.calibrationFlag = true;
+          }
+        }, {
+          key: 'onWindowResize',
+          value: function onWindowResize() {
+            this.updateDimensions();
+          }
+        }, {
+          key: 'onAnimationFrame',
+          value: function onAnimationFrame() {
+            this.updateBounds();
+            var calibratedInputX = this.inputX - this.calibrationX,
+                calibratedInputY = this.inputY - this.calibrationY;
+
+            if (Math.abs(calibratedInputX) > this.calibrationThreshold || Math.abs(calibratedInputY) > this.calibrationThreshold) {
+              this.queueCalibration(0);
+            }
+
+            if (this.portrait) {
+              this.motionX = this.calibrateX ? calibratedInputY : this.inputY;
+              this.motionY = this.calibrateY ? calibratedInputX : this.inputX;
+            } else {
+              this.motionX = this.calibrateX ? calibratedInputX : this.inputX;
+              this.motionY = this.calibrateY ? calibratedInputY : this.inputY;
+            }
+
+            this.motionX *= this.elementWidth * (this.scalarX / 100);
+            this.motionY *= this.elementHeight * (this.scalarY / 100);
+
+            if (!isNaN(parseFloat(this.limitX))) {
+              this.motionX = helpers.clamp(this.motionX, -this.limitX, this.limitX);
+            }
+
+            if (!isNaN(parseFloat(this.limitY))) {
+              this.motionY = helpers.clamp(this.motionY, -this.limitY, this.limitY);
+            }
+
+            this.velocityX += (this.motionX - this.velocityX) * this.frictionX;
+            this.velocityY += (this.motionY - this.velocityY) * this.frictionY;
+
+            for (var index = 0; index < this.layers.length; index++) {
+              var layer = this.layers[index],
+                  depthX = this.depthsX[index],
+                  depthY = this.depthsY[index],
+                  xOffset = this.velocityX * (depthX * (this.invertX ? -1 : 1)),
+                  yOffset = this.velocityY * (depthY * (this.invertY ? -1 : 1));
+              this.setPosition(layer, xOffset, yOffset);
+            }
+
+            this.raf = rqAnFr(this.onAnimationFrame);
+          }
+        }, {
+          key: 'rotate',
+          value: function rotate(beta, gamma) {
+            // Extract Rotation
+            var x = (beta || 0) / MAGIC_NUMBER,
+                //  -90 :: 90
+            y = (gamma || 0) / MAGIC_NUMBER; // -180 :: 180
+            // Detect Orientation Change
+
+            var portrait = this.windowHeight > this.windowWidth;
+
+            if (this.portrait !== portrait) {
+              this.portrait = portrait;
+              this.calibrationFlag = true;
+            }
+
+            if (this.calibrationFlag) {
+              this.calibrationFlag = false;
+              this.calibrationX = x;
+              this.calibrationY = y;
+            }
+
+            this.inputX = x;
+            this.inputY = y;
+          }
+        }, {
+          key: 'onDeviceOrientation',
+          value: function onDeviceOrientation(event) {
+            var beta = event.beta;
+            var gamma = event.gamma;
+
+            if (beta !== null && gamma !== null) {
+              this.orientationStatus = 1;
+              this.rotate(beta, gamma);
+            }
+          }
+        }, {
+          key: 'onDeviceMotion',
+          value: function onDeviceMotion(event) {
+            var beta = event.rotationRate.beta;
+            var gamma = event.rotationRate.gamma;
+
+            if (beta !== null && gamma !== null) {
+              this.motionStatus = 1;
+              this.rotate(beta, gamma);
+            }
+          }
+        }, {
+          key: 'onMouseMove',
+          value: function onMouseMove(event) {
+            var clientX = event.clientX,
+                clientY = event.clientY; // reset input to center if hoverOnly is set and we're not hovering the element
+
+            if (this.hoverOnly && (clientX < this.elementPositionX || clientX > this.elementPositionX + this.elementWidth || clientY < this.elementPositionY || clientY > this.elementPositionY + this.elementHeight)) {
+              this.inputX = 0;
+              this.inputY = 0;
+              return;
+            }
+
+            if (this.relativeInput) {
+              // Clip mouse coordinates inside element bounds.
+              if (this.clipRelativeInput) {
+                clientX = Math.max(clientX, this.elementPositionX);
+                clientX = Math.min(clientX, this.elementPositionX + this.elementWidth);
+                clientY = Math.max(clientY, this.elementPositionY);
+                clientY = Math.min(clientY, this.elementPositionY + this.elementHeight);
+              } // Calculate input relative to the element.
+
+
+              if (this.elementRangeX && this.elementRangeY) {
+                this.inputX = (clientX - this.elementPositionX - this.elementCenterX) / this.elementRangeX;
+                this.inputY = (clientY - this.elementPositionY - this.elementCenterY) / this.elementRangeY;
+              }
+            } else {
+              // Calculate input relative to the window.
+              if (this.windowRadiusX && this.windowRadiusY) {
+                this.inputX = (clientX - this.windowCenterX) / this.windowRadiusX;
+                this.inputY = (clientY - this.windowCenterY) / this.windowRadiusY;
+              }
+            }
+          }
+        }, {
+          key: 'destroy',
+          value: function destroy() {
+            this.disable();
+            clearTimeout(this.calibrationTimer);
+            clearTimeout(this.detectionTimer);
+            this.element.removeAttribute('style');
+
+            for (var index = 0; index < this.layers.length; index++) {
+              this.layers[index].removeAttribute('style');
+            }
+
+            delete this.element;
+            delete this.layers;
+          }
+        }, {
+          key: 'version',
+          value: function version() {
+            return '3.1.0';
+          }
+        }]);
+
+        return Parallax;
+      }();
+
+      module.exports = Parallax;
+    }, {
+      "object-assign": 1,
+      "raf": 4
+    }]
+  }, {}, [5])(5);
+});
+},{"process":"node_modules/process/browser.js"}],"src/images/parallax/bg.jpg":[function(require,module,exports) {
+module.exports = "/bg.cdafc6f5.jpg";
+},{}],"src/components/Parallax.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _parallaxJs = _interopRequireDefault(require("parallax-js"));
+
+var _styles = require("@material-ui/core/styles");
+
+var _bg = _interopRequireDefault(require("../images/parallax/bg.jpg"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var useStyles = (0, _styles.makeStyles)(function (theme) {
+  return {
+    bg: {
+      width: "100%",
+      maxWidth: '100%',
+      height: 760,
+      padding: 0,
+      margin: "0 auto;",
+      backgroundColor: 'grey'
+    }
   };
+});
 
-  fn.propTypes = "development" !== 'production' ? (0, _defineProperty2.default)({}, prop, _responsivePropType.default) : {};
-  fn.filterProps = [prop];
-  return fn;
-}
+var ParallaxImage = function ParallaxImage() {
+  var classes = useStyles();
+  return _react.default.createElement("div", {
+    id: "splash"
+  }, _react.default.createElement("div", null, _react.default.createElement("img", {
+    className: classes.bg,
+    src: _bg.default
+  })));
+};
 
-var _default = style;
+var _default = ParallaxImage;
 exports.default = _default;
-},{"@babel/runtime/helpers/esm/defineProperty":"node_modules/@babel/runtime/helpers/esm/defineProperty.js","./responsivePropType":"node_modules/@material-ui/system/esm/responsivePropType.js","./breakpoints":"node_modules/@material-ui/system/esm/breakpoints.js"}],"node_modules/@material-ui/system/esm/compose.js":[function(require,module,exports) {
+},{"react":"node_modules/react/index.js","parallax-js":"node_modules/parallax-js/dist/parallax.js","@material-ui/core/styles":"node_modules/@material-ui/core/esm/styles/index.js","../images/parallax/bg.jpg":"src/images/parallax/bg.jpg"}],"node_modules/@material-ui/core/esm/Typography/Typography.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports.default = exports.styles = void 0;
 
 var _extends2 = _interopRequireDefault(require("@babel/runtime/helpers/esm/extends"));
 
-var _merge = _interopRequireDefault(require("./merge"));
+var _objectWithoutProperties2 = _interopRequireDefault(require("@babel/runtime/helpers/esm/objectWithoutProperties"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function compose() {
-  for (var _len = arguments.length, styles = new Array(_len), _key = 0; _key < _len; _key++) {
-    styles[_key] = arguments[_key];
-  }
-
-  var fn = function fn(props) {
-    return styles.reduce(function (acc, style) {
-      var output = style(props);
-
-      if (output) {
-        return (0, _merge.default)(acc, output);
-      }
-
-      return acc;
-    }, {});
-  }; // Alternative approach that doesn't yield any performance gain.
-  // const handlers = styles.reduce((acc, style) => {
-  //   style.filterProps.forEach(prop => {
-  //     acc[prop] = style;
-  //   });
-  //   return acc;
-  // }, {});
-  // const fn = props => {
-  //   return Object.keys(props).reduce((acc, prop) => {
-  //     if (handlers[prop]) {
-  //       return merge(acc, handlers[prop](props));
-  //     }
-  //     return acc;
-  //   }, {});
-  // };
-
-
-  fn.propTypes = "development" !== 'production' ? styles.reduce(function (acc, style) {
-    return (0, _extends2.default)(acc, style.propTypes);
-  }, {}) : {};
-  fn.filterProps = styles.reduce(function (acc, style) {
-    return acc.concat(style.filterProps);
-  }, []);
-  return fn;
-}
-
-var _default = compose;
-exports.default = _default;
-},{"@babel/runtime/helpers/esm/extends":"node_modules/@babel/runtime/helpers/esm/extends.js","./merge":"node_modules/@material-ui/system/esm/merge.js"}],"node_modules/@material-ui/system/esm/borders.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = exports.borderRadius = exports.borderColor = exports.borderLeft = exports.borderBottom = exports.borderRight = exports.borderTop = exports.border = void 0;
-
-var _style = _interopRequireDefault(require("./style"));
-
-var _compose = _interopRequireDefault(require("./compose"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function getBorder(value) {
-  if (typeof value !== 'number') {
-    return value;
-  }
-
-  return "".concat(value, "px solid");
-}
-
-var border = (0, _style.default)({
-  prop: 'border',
-  themeKey: 'borders',
-  transform: getBorder
-});
-exports.border = border;
-var borderTop = (0, _style.default)({
-  prop: 'borderTop',
-  themeKey: 'borders',
-  transform: getBorder
-});
-exports.borderTop = borderTop;
-var borderRight = (0, _style.default)({
-  prop: 'borderRight',
-  themeKey: 'borders',
-  transform: getBorder
-});
-exports.borderRight = borderRight;
-var borderBottom = (0, _style.default)({
-  prop: 'borderBottom',
-  themeKey: 'borders',
-  transform: getBorder
-});
-exports.borderBottom = borderBottom;
-var borderLeft = (0, _style.default)({
-  prop: 'borderLeft',
-  themeKey: 'borders',
-  transform: getBorder
-});
-exports.borderLeft = borderLeft;
-var borderColor = (0, _style.default)({
-  prop: 'borderColor',
-  themeKey: 'palette'
-});
-exports.borderColor = borderColor;
-var borderRadius = (0, _style.default)({
-  prop: 'borderRadius',
-  themeKey: 'shape'
-});
-exports.borderRadius = borderRadius;
-var borders = (0, _compose.default)(border, borderTop, borderRight, borderBottom, borderLeft, borderColor, borderRadius);
-var _default = borders;
-exports.default = _default;
-},{"./style":"node_modules/@material-ui/system/esm/style.js","./compose":"node_modules/@material-ui/system/esm/compose.js"}],"node_modules/@material-ui/system/esm/css.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/esm/toConsumableArray"));
-
-var _extends2 = _interopRequireDefault(require("@babel/runtime/helpers/esm/extends"));
+var _react = _interopRequireDefault(require("react"));
 
 var _propTypes = _interopRequireDefault(require("prop-types"));
 
-var _merge = _interopRequireDefault(require("./merge"));
+var _clsx = _interopRequireDefault(require("clsx"));
+
+var _withStyles = _interopRequireDefault(require("../styles/withStyles"));
+
+var _helpers = require("../utils/helpers");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function omit(input, fields) {
-  var output = {};
-  Object.keys(input).forEach(function (prop) {
-    if (fields.indexOf(prop) === -1) {
-      output[prop] = input[prop];
+var styles = function styles(theme) {
+  return {
+    /* Styles applied to the root element. */
+    root: {
+      margin: 0
+    },
+
+    /* Styles applied to the root element if `variant="body2"`. */
+    body2: theme.typography.body2,
+
+    /* Styles applied to the root element if `variant="body1"`. */
+    body1: theme.typography.body1,
+
+    /* Styles applied to the root element if `variant="caption"`. */
+    caption: theme.typography.caption,
+
+    /* Styles applied to the root element if `variant="button"`. */
+    button: theme.typography.button,
+
+    /* Styles applied to the root element if `variant="h1"`. */
+    h1: theme.typography.h1,
+
+    /* Styles applied to the root element if `variant="h2"`. */
+    h2: theme.typography.h2,
+
+    /* Styles applied to the root element if `variant="h3"`. */
+    h3: theme.typography.h3,
+
+    /* Styles applied to the root element if `variant="h4"`. */
+    h4: theme.typography.h4,
+
+    /* Styles applied to the root element if `variant="h5"`. */
+    h5: theme.typography.h5,
+
+    /* Styles applied to the root element if `variant="h6"`. */
+    h6: theme.typography.h6,
+
+    /* Styles applied to the root element if `variant="subtitle1"`. */
+    subtitle1: theme.typography.subtitle1,
+
+    /* Styles applied to the root element if `variant="subtitle2"`. */
+    subtitle2: theme.typography.subtitle2,
+
+    /* Styles applied to the root element if `variant="overline"`. */
+    overline: theme.typography.overline,
+
+    /* Styles applied to the root element if `variant="srOnly"`. Only accessible to screen readers. */
+    srOnly: {
+      position: 'absolute',
+      height: 1,
+      width: 1,
+      overflow: 'hidden'
+    },
+
+    /* Styles applied to the root element if `align="left"`. */
+    alignLeft: {
+      textAlign: 'left'
+    },
+
+    /* Styles applied to the root element if `align="center"`. */
+    alignCenter: {
+      textAlign: 'center'
+    },
+
+    /* Styles applied to the root element if `align="right"`. */
+    alignRight: {
+      textAlign: 'right'
+    },
+
+    /* Styles applied to the root element if `align="justify"`. */
+    alignJustify: {
+      textAlign: 'justify'
+    },
+
+    /* Styles applied to the root element if `align="nowrap"`. */
+    noWrap: {
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
+    },
+
+    /* Styles applied to the root element if `gutterBottom={true}`. */
+    gutterBottom: {
+      marginBottom: '0.35em'
+    },
+
+    /* Styles applied to the root element if `paragraph={true}`. */
+    paragraph: {
+      marginBottom: 16
+    },
+
+    /* Styles applied to the root element if `color="inherit"`. */
+    colorInherit: {
+      color: 'inherit'
+    },
+
+    /* Styles applied to the root element if `color="primary"`. */
+    colorPrimary: {
+      color: theme.palette.primary.main
+    },
+
+    /* Styles applied to the root element if `color="secondary"`. */
+    colorSecondary: {
+      color: theme.palette.secondary.main
+    },
+
+    /* Styles applied to the root element if `color="textPrimary"`. */
+    colorTextPrimary: {
+      color: theme.palette.text.primary
+    },
+
+    /* Styles applied to the root element if `color="textSecondary"`. */
+    colorTextSecondary: {
+      color: theme.palette.text.secondary
+    },
+
+    /* Styles applied to the root element if `color="error"`. */
+    colorError: {
+      color: theme.palette.error.main
+    },
+
+    /* Styles applied to the root element if `display="inline"`. */
+    displayInline: {
+      display: 'inline'
+    },
+
+    /* Styles applied to the root element if `display="block"`. */
+    displayBlock: {
+      display: 'block'
     }
-  });
-  return output;
-}
-
-function css(styleFunction) {
-  var newStyleFunction = function newStyleFunction(props) {
-    var output = styleFunction(props);
-
-    if (props.css) {
-      return (0, _extends2.default)({}, (0, _merge.default)(output, styleFunction((0, _extends2.default)({
-        theme: props.theme
-      }, props.css))), {}, omit(props.css, [styleFunction.filterProps]));
-    }
-
-    return output;
   };
-
-  newStyleFunction.propTypes = "development" !== 'production' ? (0, _extends2.default)({}, styleFunction.propTypes, {
-    css: _propTypes.default.object
-  }) : {};
-  newStyleFunction.filterProps = ['css'].concat((0, _toConsumableArray2.default)(styleFunction.filterProps));
-  return newStyleFunction;
-}
-
-var _default = css;
-exports.default = _default;
-},{"@babel/runtime/helpers/esm/toConsumableArray":"node_modules/@babel/runtime/helpers/esm/toConsumableArray.js","@babel/runtime/helpers/esm/extends":"node_modules/@babel/runtime/helpers/esm/extends.js","prop-types":"node_modules/prop-types/index.js","./merge":"node_modules/@material-ui/system/esm/merge.js"}],"node_modules/@material-ui/system/esm/display.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = exports.whiteSpace = exports.visibility = exports.textOverflow = exports.overflow = exports.displayRaw = exports.displayPrint = void 0;
-
-var _style = _interopRequireDefault(require("./style"));
-
-var _compose = _interopRequireDefault(require("./compose"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var displayPrint = (0, _style.default)({
-  prop: 'displayPrint',
-  cssProperty: false,
-  transform: function transform(value) {
-    return {
-      '@media print': {
-        display: value
-      }
-    };
-  }
-});
-exports.displayPrint = displayPrint;
-var displayRaw = (0, _style.default)({
-  prop: 'display'
-});
-exports.displayRaw = displayRaw;
-var overflow = (0, _style.default)({
-  prop: 'overflow'
-});
-exports.overflow = overflow;
-var textOverflow = (0, _style.default)({
-  prop: 'textOverflow'
-});
-exports.textOverflow = textOverflow;
-var visibility = (0, _style.default)({
-  prop: 'visibility'
-});
-exports.visibility = visibility;
-var whiteSpace = (0, _style.default)({
-  prop: 'whiteSpace'
-});
-exports.whiteSpace = whiteSpace;
-
-var _default = (0, _compose.default)(displayPrint, displayRaw, overflow, textOverflow, visibility, whiteSpace);
-
-exports.default = _default;
-},{"./style":"node_modules/@material-ui/system/esm/style.js","./compose":"node_modules/@material-ui/system/esm/compose.js"}],"node_modules/@material-ui/system/esm/flexbox.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = exports.justifySelf = exports.justifyItems = exports.alignSelf = exports.flexShrink = exports.flexGrow = exports.flex = exports.order = exports.alignContent = exports.alignItems = exports.justifyContent = exports.flexWrap = exports.flexDirection = exports.flexBasis = void 0;
-
-var _style = _interopRequireDefault(require("./style"));
-
-var _compose = _interopRequireDefault(require("./compose"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var flexBasis = (0, _style.default)({
-  prop: 'flexBasis'
-});
-exports.flexBasis = flexBasis;
-var flexDirection = (0, _style.default)({
-  prop: 'flexDirection'
-});
-exports.flexDirection = flexDirection;
-var flexWrap = (0, _style.default)({
-  prop: 'flexWrap'
-});
-exports.flexWrap = flexWrap;
-var justifyContent = (0, _style.default)({
-  prop: 'justifyContent'
-});
-exports.justifyContent = justifyContent;
-var alignItems = (0, _style.default)({
-  prop: 'alignItems'
-});
-exports.alignItems = alignItems;
-var alignContent = (0, _style.default)({
-  prop: 'alignContent'
-});
-exports.alignContent = alignContent;
-var order = (0, _style.default)({
-  prop: 'order'
-});
-exports.order = order;
-var flex = (0, _style.default)({
-  prop: 'flex'
-});
-exports.flex = flex;
-var flexGrow = (0, _style.default)({
-  prop: 'flexGrow'
-});
-exports.flexGrow = flexGrow;
-var flexShrink = (0, _style.default)({
-  prop: 'flexShrink'
-});
-exports.flexShrink = flexShrink;
-var alignSelf = (0, _style.default)({
-  prop: 'alignSelf'
-});
-exports.alignSelf = alignSelf;
-var justifyItems = (0, _style.default)({
-  prop: 'justifyItems'
-});
-exports.justifyItems = justifyItems;
-var justifySelf = (0, _style.default)({
-  prop: 'justifySelf'
-});
-exports.justifySelf = justifySelf;
-var flexbox = (0, _compose.default)(flexBasis, flexDirection, flexWrap, justifyContent, alignItems, alignContent, order, flex, flexGrow, flexShrink, alignSelf, justifyItems, justifySelf);
-var _default = flexbox;
-exports.default = _default;
-},{"./style":"node_modules/@material-ui/system/esm/style.js","./compose":"node_modules/@material-ui/system/esm/compose.js"}],"node_modules/@material-ui/system/esm/palette.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = exports.bgcolor = exports.color = void 0;
-
-var _style = _interopRequireDefault(require("./style"));
-
-var _compose = _interopRequireDefault(require("./compose"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var color = (0, _style.default)({
-  prop: 'color',
-  themeKey: 'palette'
-});
-exports.color = color;
-var bgcolor = (0, _style.default)({
-  prop: 'bgcolor',
-  cssProperty: 'backgroundColor',
-  themeKey: 'palette'
-});
-exports.bgcolor = bgcolor;
-var palette = (0, _compose.default)(color, bgcolor);
-var _default = palette;
-exports.default = _default;
-},{"./style":"node_modules/@material-ui/system/esm/style.js","./compose":"node_modules/@material-ui/system/esm/compose.js"}],"node_modules/@material-ui/system/esm/positions.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = exports.left = exports.bottom = exports.right = exports.top = exports.zIndex = exports.position = void 0;
-
-var _style = _interopRequireDefault(require("./style"));
-
-var _compose = _interopRequireDefault(require("./compose"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var position = (0, _style.default)({
-  prop: 'position'
-});
-exports.position = position;
-var zIndex = (0, _style.default)({
-  prop: 'zIndex',
-  themeKey: 'zIndex'
-});
-exports.zIndex = zIndex;
-var top = (0, _style.default)({
-  prop: 'top'
-});
-exports.top = top;
-var right = (0, _style.default)({
-  prop: 'right'
-});
-exports.right = right;
-var bottom = (0, _style.default)({
-  prop: 'bottom'
-});
-exports.bottom = bottom;
-var left = (0, _style.default)({
-  prop: 'left'
-});
-exports.left = left;
-
-var _default = (0, _compose.default)(position, zIndex, top, right, bottom, left);
-
-exports.default = _default;
-},{"./style":"node_modules/@material-ui/system/esm/style.js","./compose":"node_modules/@material-ui/system/esm/compose.js"}],"node_modules/@material-ui/system/esm/shadows.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _style = _interopRequireDefault(require("./style"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var boxShadow = (0, _style.default)({
-  prop: 'boxShadow',
-  themeKey: 'shadows'
-});
-var _default = boxShadow;
-exports.default = _default;
-},{"./style":"node_modules/@material-ui/system/esm/style.js"}],"node_modules/@material-ui/system/esm/sizing.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = exports.sizeHeight = exports.sizeWidth = exports.minHeight = exports.maxHeight = exports.height = exports.minWidth = exports.maxWidth = exports.width = void 0;
-
-var _style = _interopRequireDefault(require("./style"));
-
-var _compose = _interopRequireDefault(require("./compose"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function transform(value) {
-  return value <= 1 ? "".concat(value * 100, "%") : value;
-}
-
-var width = (0, _style.default)({
-  prop: 'width',
-  transform: transform
-});
-exports.width = width;
-var maxWidth = (0, _style.default)({
-  prop: 'maxWidth',
-  transform: transform
-});
-exports.maxWidth = maxWidth;
-var minWidth = (0, _style.default)({
-  prop: 'minWidth',
-  transform: transform
-});
-exports.minWidth = minWidth;
-var height = (0, _style.default)({
-  prop: 'height',
-  transform: transform
-});
-exports.height = height;
-var maxHeight = (0, _style.default)({
-  prop: 'maxHeight',
-  transform: transform
-});
-exports.maxHeight = maxHeight;
-var minHeight = (0, _style.default)({
-  prop: 'minHeight',
-  transform: transform
-});
-exports.minHeight = minHeight;
-var sizeWidth = (0, _style.default)({
-  prop: 'size',
-  cssProperty: 'width',
-  transform: transform
-});
-exports.sizeWidth = sizeWidth;
-var sizeHeight = (0, _style.default)({
-  prop: 'size',
-  cssProperty: 'height',
-  transform: transform
-});
-exports.sizeHeight = sizeHeight;
-var sizing = (0, _compose.default)(width, maxWidth, minWidth, height, maxHeight, minHeight);
-var _default = sizing;
-exports.default = _default;
-},{"./style":"node_modules/@material-ui/system/esm/style.js","./compose":"node_modules/@material-ui/system/esm/compose.js"}],"node_modules/@material-ui/system/esm/memoize.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = memoize;
-
-function memoize(fn) {
-  var cache = {};
-  return function (arg) {
-    if (cache[arg] === undefined) {
-      cache[arg] = fn(arg);
-    }
-
-    return cache[arg];
-  };
-}
-},{}],"node_modules/@material-ui/system/esm/spacing.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/esm/slicedToArray"));
-
-var _warning = _interopRequireDefault(require("warning"));
-
-var _responsivePropType = _interopRequireDefault(require("./responsivePropType"));
-
-var _breakpoints = require("./breakpoints");
-
-var _merge = _interopRequireDefault(require("./merge"));
-
-var _memoize = _interopRequireDefault(require("./memoize"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var properties = {
-  m: 'margin',
-  p: 'padding'
 };
-var directions = {
-  t: 'Top',
-  r: 'Right',
-  b: 'Bottom',
-  l: 'Left',
-  x: ['Left', 'Right'],
-  y: ['Top', 'Bottom']
+
+exports.styles = styles;
+var defaultVariantMapping = {
+  h1: 'h1',
+  h2: 'h2',
+  h3: 'h3',
+  h4: 'h4',
+  h5: 'h5',
+  h6: 'h6',
+  subtitle1: 'h6',
+  subtitle2: 'h6',
+  body1: 'p',
+  body2: 'p'
 };
-var aliases = {
-  marginX: 'mx',
-  marginY: 'my',
-  paddingX: 'px',
-  paddingY: 'py'
-}; // memoize() impact:
-// From 300,000 ops/sec
-// To 350,000 ops/sec
 
-var getCssProperties = (0, _memoize.default)(function (prop) {
-  // It's not a shorthand notation.
-  if (prop.length > 2) {
-    if (aliases[prop]) {
-      prop = aliases[prop];
-    } else {
-      return [prop];
-    }
-  }
-
-  var _prop$split = prop.split(''),
-      _prop$split2 = (0, _slicedToArray2.default)(_prop$split, 2),
-      a = _prop$split2[0],
-      b = _prop$split2[1];
-
-  var property = properties[a];
-  var direction = directions[b] || '';
-  return Array.isArray(direction) ? direction.map(function (dir) {
-    return property + dir;
-  }) : [property + direction];
+var Typography = _react.default.forwardRef(function Typography(props, ref) {
+  var _props$align = props.align,
+      align = _props$align === void 0 ? 'inherit' : _props$align,
+      classes = props.classes,
+      className = props.className,
+      _props$color = props.color,
+      color = _props$color === void 0 ? 'initial' : _props$color,
+      component = props.component,
+      _props$display = props.display,
+      display = _props$display === void 0 ? 'initial' : _props$display,
+      _props$gutterBottom = props.gutterBottom,
+      gutterBottom = _props$gutterBottom === void 0 ? false : _props$gutterBottom,
+      _props$noWrap = props.noWrap,
+      noWrap = _props$noWrap === void 0 ? false : _props$noWrap,
+      _props$paragraph = props.paragraph,
+      paragraph = _props$paragraph === void 0 ? false : _props$paragraph,
+      theme = props.theme,
+      _props$variant = props.variant,
+      variant = _props$variant === void 0 ? 'body1' : _props$variant,
+      _props$variantMapping = props.variantMapping,
+      variantMapping = _props$variantMapping === void 0 ? defaultVariantMapping : _props$variantMapping,
+      other = (0, _objectWithoutProperties2.default)(props, ["align", "classes", "className", "color", "component", "display", "gutterBottom", "noWrap", "paragraph", "theme", "variant", "variantMapping"]);
+  var Component = component || (paragraph ? 'p' : variantMapping[variant] || defaultVariantMapping[variant]) || 'span';
+  return _react.default.createElement(Component, (0, _extends2.default)({
+    className: (0, _clsx.default)(classes.root, className, variant !== 'inherit' && classes[variant], color !== 'initial' && classes["color".concat((0, _helpers.capitalize)(color))], noWrap && classes.noWrap, gutterBottom && classes.gutterBottom, paragraph && classes.paragraph, align !== 'inherit' && classes["align".concat((0, _helpers.capitalize)(align))], display !== 'initial' && classes["display".concat((0, _helpers.capitalize)(display))]),
+    ref: ref
+  }, other));
 });
-var spacingKeys = ['m', 'mt', 'mr', 'mb', 'ml', 'mx', 'my', 'p', 'pt', 'pr', 'pb', 'pl', 'px', 'py', 'margin', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft', 'marginX', 'marginY', 'padding', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'paddingX', 'paddingY'];
 
-function getTransformer(theme) {
-  var themeSpacing = theme.spacing || 8;
+"development" !== "production" ? Typography.propTypes = {
+  /**
+   * Set the text-align on the component.
+   */
+  align: _propTypes.default.oneOf(['inherit', 'left', 'center', 'right', 'justify']),
 
-  if (typeof themeSpacing === 'number') {
-    return function (abs) {
-      return themeSpacing * abs;
-    };
-  }
+  /**
+   * The content of the component.
+   */
+  children: _propTypes.default.node,
 
-  if (Array.isArray(themeSpacing)) {
-    return function (abs) {
-      "development" !== "production" ? (0, _warning.default)(abs <= themeSpacing.length - 1, ["@material-ui/system: the value provided (".concat(abs, ") overflows."), "The supported values are: ".concat(JSON.stringify(themeSpacing), "."), "".concat(abs, " > ").concat(themeSpacing.length - 1, ", you need to add the missing values.")].join('\n')) : void 0;
-      return themeSpacing[abs];
-    };
-  }
+  /**
+   * Override or extend the styles applied to the component.
+   * See [CSS API](#css) below for more details.
+   */
+  classes: _propTypes.default.object.isRequired,
 
-  if (typeof themeSpacing === 'function') {
-    return themeSpacing;
-  }
+  /**
+   * @ignore
+   */
+  className: _propTypes.default.string,
 
-  "development" !== "production" ? (0, _warning.default)(false, ["@material-ui/system: the `theme.spacing` value (".concat(themeSpacing, ") is invalid."), 'It should be a number, an array or a function.'].join('\n')) : void 0;
-  return function () {
-    return undefined;
-  };
-}
+  /**
+   * The color of the component. It supports those theme colors that make sense for this component.
+   */
+  color: _propTypes.default.oneOf(['initial', 'inherit', 'primary', 'secondary', 'textPrimary', 'textSecondary', 'error']),
 
-function getValue(transformer, propValue) {
-  if (typeof propValue === 'string') {
-    return propValue;
-  }
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   * By default, it maps the variant to a good default headline component.
+   */
+  component: _propTypes.default.elementType,
 
-  var abs = Math.abs(propValue);
-  var transformed = transformer(abs);
+  /**
+   * Controls the display type
+   */
+  display: _propTypes.default.oneOf(['initial', 'block', 'inline']),
 
-  if (propValue >= 0) {
-    return transformed;
-  }
+  /**
+   * If `true`, the text will have a bottom margin.
+   */
+  gutterBottom: _propTypes.default.bool,
 
-  if (typeof transformed === 'number') {
-    return -transformed;
-  }
+  /**
+   * If `true`, the text will not wrap, but instead will truncate with an ellipsis.
+   */
+  noWrap: _propTypes.default.bool,
 
-  return "-".concat(transformed);
-}
+  /**
+   * If `true`, the text will have a bottom margin.
+   */
+  paragraph: _propTypes.default.bool,
 
-function getStyleFromPropValue(cssProperties, transformer) {
-  return function (propValue) {
-    return cssProperties.reduce(function (acc, cssProperty) {
-      acc[cssProperty] = getValue(transformer, propValue);
-      return acc;
-    }, {});
-  };
-}
+  /**
+   * @ignore
+   */
+  theme: _propTypes.default.object.isRequired,
 
-function spacing(props) {
-  var theme = props.theme;
-  var transformer = getTransformer(theme);
-  return Object.keys(props).map(function (prop) {
-    // Using a hash computation over an array iteration could be faster, but with only 28 items,
-    // it's doesn't worth the bundle size.
-    if (spacingKeys.indexOf(prop) === -1) {
-      return null;
-    }
+  /**
+   * Applies the theme typography styles.
+   */
+  variant: _propTypes.default.oneOf(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'subtitle1', 'subtitle2', 'body1', 'body2', 'caption', 'button', 'overline', 'srOnly', 'inherit']),
 
-    var cssProperties = getCssProperties(prop);
-    var styleFromPropValue = getStyleFromPropValue(cssProperties, transformer);
-    var propValue = props[prop];
-    return (0, _breakpoints.handleBreakpoints)(props, propValue, styleFromPropValue);
-  }).reduce(_merge.default, {});
-}
+  /**
+   * We are empirically mapping the variant prop to a range of different DOM element types.
+   * For instance, subtitle1 to `<h6>`.
+   * If you wish to change that mapping, you can provide your own.
+   * Alternatively, you can use the `component` prop.
+   */
+  variantMapping: _propTypes.default.object
+} : void 0;
 
-spacing.propTypes = "development" !== 'production' ? spacingKeys.reduce(function (obj, key) {
-  obj[key] = _responsivePropType.default;
-  return obj;
-}, {}) : {};
-spacing.filterProps = spacingKeys;
-var _default = spacing;
+var _default = (0, _withStyles.default)(styles, {
+  name: 'MuiTypography',
+  withTheme: true
+})(Typography);
+
 exports.default = _default;
-},{"@babel/runtime/helpers/esm/slicedToArray":"node_modules/@babel/runtime/helpers/esm/slicedToArray.js","warning":"node_modules/warning/warning.js","./responsivePropType":"node_modules/@material-ui/system/esm/responsivePropType.js","./breakpoints":"node_modules/@material-ui/system/esm/breakpoints.js","./merge":"node_modules/@material-ui/system/esm/merge.js","./memoize":"node_modules/@material-ui/system/esm/memoize.js"}],"node_modules/@material-ui/system/esm/typography.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = exports.textAlign = exports.lineHeight = exports.letterSpacing = exports.fontWeight = exports.fontStyle = exports.fontSize = exports.fontFamily = void 0;
-
-var _style = _interopRequireDefault(require("./style"));
-
-var _compose = _interopRequireDefault(require("./compose"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var fontFamily = (0, _style.default)({
-  prop: 'fontFamily',
-  themeKey: 'typography'
-});
-exports.fontFamily = fontFamily;
-var fontSize = (0, _style.default)({
-  prop: 'fontSize',
-  themeKey: 'typography'
-});
-exports.fontSize = fontSize;
-var fontStyle = (0, _style.default)({
-  prop: 'fontStyle',
-  themeKey: 'typography'
-});
-exports.fontStyle = fontStyle;
-var fontWeight = (0, _style.default)({
-  prop: 'fontWeight',
-  themeKey: 'typography'
-});
-exports.fontWeight = fontWeight;
-var letterSpacing = (0, _style.default)({
-  prop: 'letterSpacing'
-});
-exports.letterSpacing = letterSpacing;
-var lineHeight = (0, _style.default)({
-  prop: 'lineHeight'
-});
-exports.lineHeight = lineHeight;
-var textAlign = (0, _style.default)({
-  prop: 'textAlign'
-});
-exports.textAlign = textAlign;
-var typography = (0, _compose.default)(fontFamily, fontSize, fontStyle, fontWeight, letterSpacing, lineHeight, textAlign);
-var _default = typography;
-exports.default = _default;
-},{"./style":"node_modules/@material-ui/system/esm/style.js","./compose":"node_modules/@material-ui/system/esm/compose.js"}],"node_modules/@material-ui/system/esm/index.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var _exportNames = {
-  borders: true,
-  breakpoints: true,
-  compose: true,
-  css: true,
-  display: true,
-  flexbox: true,
-  palette: true,
-  positions: true,
-  shadows: true,
-  sizing: true,
-  spacing: true,
-  style: true,
-  typography: true
-};
-Object.defineProperty(exports, "borders", {
-  enumerable: true,
-  get: function () {
-    return _borders.default;
-  }
-});
-Object.defineProperty(exports, "breakpoints", {
-  enumerable: true,
-  get: function () {
-    return _breakpoints.default;
-  }
-});
-Object.defineProperty(exports, "compose", {
-  enumerable: true,
-  get: function () {
-    return _compose.default;
-  }
-});
-Object.defineProperty(exports, "css", {
-  enumerable: true,
-  get: function () {
-    return _css.default;
-  }
-});
-Object.defineProperty(exports, "display", {
-  enumerable: true,
-  get: function () {
-    return _display.default;
-  }
-});
-Object.defineProperty(exports, "flexbox", {
-  enumerable: true,
-  get: function () {
-    return _flexbox.default;
-  }
-});
-Object.defineProperty(exports, "palette", {
-  enumerable: true,
-  get: function () {
-    return _palette.default;
-  }
-});
-Object.defineProperty(exports, "positions", {
-  enumerable: true,
-  get: function () {
-    return _positions.default;
-  }
-});
-Object.defineProperty(exports, "shadows", {
-  enumerable: true,
-  get: function () {
-    return _shadows.default;
-  }
-});
-Object.defineProperty(exports, "sizing", {
-  enumerable: true,
-  get: function () {
-    return _sizing.default;
-  }
-});
-Object.defineProperty(exports, "spacing", {
-  enumerable: true,
-  get: function () {
-    return _spacing.default;
-  }
-});
-Object.defineProperty(exports, "style", {
-  enumerable: true,
-  get: function () {
-    return _style.default;
-  }
-});
-Object.defineProperty(exports, "typography", {
-  enumerable: true,
-  get: function () {
-    return _typography.default;
-  }
-});
-
-var _borders = _interopRequireWildcard(require("./borders"));
-
-Object.keys(_borders).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _borders[key];
-    }
-  });
-});
-
-var _breakpoints = _interopRequireDefault(require("./breakpoints"));
-
-var _compose = _interopRequireDefault(require("./compose"));
-
-var _css = _interopRequireDefault(require("./css"));
-
-var _display = _interopRequireDefault(require("./display"));
-
-var _flexbox = _interopRequireWildcard(require("./flexbox"));
-
-Object.keys(_flexbox).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _flexbox[key];
-    }
-  });
-});
-
-var _palette = _interopRequireWildcard(require("./palette"));
-
-Object.keys(_palette).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _palette[key];
-    }
-  });
-});
-
-var _positions = _interopRequireWildcard(require("./positions"));
-
-Object.keys(_positions).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _positions[key];
-    }
-  });
-});
-
-var _shadows = _interopRequireDefault(require("./shadows"));
-
-var _sizing = _interopRequireWildcard(require("./sizing"));
-
-Object.keys(_sizing).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _sizing[key];
-    }
-  });
-});
-
-var _spacing = _interopRequireDefault(require("./spacing"));
-
-var _style = _interopRequireDefault(require("./style"));
-
-var _typography = _interopRequireWildcard(require("./typography"));
-
-Object.keys(_typography).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function () {
-      return _typography[key];
-    }
-  });
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
-},{"./borders":"node_modules/@material-ui/system/esm/borders.js","./breakpoints":"node_modules/@material-ui/system/esm/breakpoints.js","./compose":"node_modules/@material-ui/system/esm/compose.js","./css":"node_modules/@material-ui/system/esm/css.js","./display":"node_modules/@material-ui/system/esm/display.js","./flexbox":"node_modules/@material-ui/system/esm/flexbox.js","./palette":"node_modules/@material-ui/system/esm/palette.js","./positions":"node_modules/@material-ui/system/esm/positions.js","./shadows":"node_modules/@material-ui/system/esm/shadows.js","./sizing":"node_modules/@material-ui/system/esm/sizing.js","./spacing":"node_modules/@material-ui/system/esm/spacing.js","./style":"node_modules/@material-ui/system/esm/style.js","./typography":"node_modules/@material-ui/system/esm/typography.js"}],"node_modules/@material-ui/core/esm/Box/Box.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = exports.styleFunction = void 0;
-
-var _system = require("@material-ui/system");
-
-var _styled = _interopRequireDefault(require("../styles/styled"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var styleFunction = (0, _system.css)((0, _system.compose)(_system.borders, _system.display, _system.flexbox, _system.positions, _system.palette, _system.shadows, _system.sizing, _system.spacing, _system.typography));
-/**
- * @ignore - do not document.
- */
-
-exports.styleFunction = styleFunction;
-var Box = (0, _styled.default)('div')(styleFunction, {
-  name: 'MuiBox'
-});
-var _default = Box;
-exports.default = _default;
-},{"@material-ui/system":"node_modules/@material-ui/system/esm/index.js","../styles/styled":"node_modules/@material-ui/core/esm/styles/styled.js"}],"node_modules/@material-ui/core/esm/Box/index.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/esm/extends":"node_modules/@babel/runtime/helpers/esm/extends.js","@babel/runtime/helpers/esm/objectWithoutProperties":"node_modules/@babel/runtime/helpers/esm/objectWithoutProperties.js","react":"node_modules/react/index.js","prop-types":"node_modules/prop-types/index.js","clsx":"node_modules/clsx/dist/clsx.m.js","../styles/withStyles":"node_modules/@material-ui/core/esm/styles/withStyles.js","../utils/helpers":"node_modules/@material-ui/core/esm/utils/helpers.js"}],"node_modules/@material-ui/core/esm/Typography/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -44703,20 +45298,14 @@ Object.defineProperty(exports, "__esModule", {
 Object.defineProperty(exports, "default", {
   enumerable: true,
   get: function () {
-    return _Box.default;
-  }
-});
-Object.defineProperty(exports, "styleFunction", {
-  enumerable: true,
-  get: function () {
-    return _Box.styleFunction;
+    return _Typography.default;
   }
 });
 
-var _Box = _interopRequireWildcard(require("./Box"));
+var _Typography = _interopRequireDefault(require("./Typography"));
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
-},{"./Box":"node_modules/@material-ui/core/esm/Box/Box.js"}],"src/components/HeroOverlay.js":[function(require,module,exports) {
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+},{"./Typography":"node_modules/@material-ui/core/esm/Typography/Typography.js"}],"src/components/HeroOverlay.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -44728,9 +45317,7 @@ var _react = _interopRequireDefault(require("react"));
 
 var _Button = _interopRequireDefault(require("@material-ui/core/Button"));
 
-var _Box = _interopRequireDefault(require("@material-ui/core/Box"));
-
-var _system = require("@material-ui/system");
+var _Typography = _interopRequireDefault(require("@material-ui/core/Typography"));
 
 var _styles = require("@material-ui/core/styles");
 
@@ -44739,12 +45326,18 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var useStyles = (0, _styles.makeStyles)(function (theme) {
   return {
     root: {
-      textShadow: '1px 1px 2px #000;'
+      textShadow: '1px 1px 2px #000;',
+      color: '#FFFFFF',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      position: 'absolute',
+      top: 380,
+      textAlign: 'center'
     },
     startButton: {
       backgroundColor: theme.palette.success,
       position: 'absolute',
-      top: 550,
+      top: 600,
       left: '50%',
       padding: '16px 48px;',
       fontSize: 29,
@@ -44752,15 +45345,29 @@ var useStyles = (0, _styles.makeStyles)(function (theme) {
       color: '#FFFFFF',
       transform: 'translateX(-50%)',
       boxShadow: '0 4px 10px 0 rgba(0,0,0,.16), 0 2px 20px 0 rgba(0,0,0,.1)'
+    },
+    heroText: {
+      fontSize: '4.2rem',
+      marginBottom: 25.5
+    },
+    heroTextSmall: {
+      fontSize: '1.6rem',
+      fontFamily: "'Roboto', sans-serif;",
+      fontWeight: 300,
+      marginBottom: 25.5
     }
   };
 });
 
 var HeroOverlay = function HeroOverlay() {
   var classes = useStyles();
-  return _react.default.createElement("div", {
+  return _react.default.createElement("div", null, _react.default.createElement("div", {
     className: classes.root
-  }, _react.default.createElement(_Button.default, {
+  }, _react.default.createElement(_Typography.default, {
+    className: classes.heroText
+  }, "Game dev made easy"), _react.default.createElement(_Typography.default, {
+    className: classes.heroTextSmall
+  }, "The most engaging way to learn code and game design")), _react.default.createElement(_Button.default, {
     className: classes.startButton,
     variant: "contained"
   }, "Start Making"));
@@ -44768,7 +45375,7 @@ var HeroOverlay = function HeroOverlay() {
 
 var _default = HeroOverlay;
 exports.default = _default;
-},{"react":"node_modules/react/index.js","@material-ui/core/Button":"node_modules/@material-ui/core/esm/Button/index.js","@material-ui/core/Box":"node_modules/@material-ui/core/esm/Box/index.js","@material-ui/system":"node_modules/@material-ui/system/esm/index.js","@material-ui/core/styles":"node_modules/@material-ui/core/esm/styles/index.js"}],"src/components/ParallaxHero.js":[function(require,module,exports) {
+},{"react":"node_modules/react/index.js","@material-ui/core/Button":"node_modules/@material-ui/core/esm/Button/index.js","@material-ui/core/Typography":"node_modules/@material-ui/core/esm/Typography/index.js","@material-ui/core/styles":"node_modules/@material-ui/core/esm/styles/index.js"}],"src/components/ParallaxHero.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -44782,6 +45389,8 @@ var _Container = _interopRequireDefault(require("@material-ui/core/Container"));
 
 var _Button = _interopRequireDefault(require("@material-ui/core/Button"));
 
+var _Parallax = _interopRequireDefault(require("./Parallax"));
+
 var _styles = require("@material-ui/core/styles");
 
 var _HeroOverlay = _interopRequireDefault(require("./HeroOverlay"));
@@ -44792,10 +45401,9 @@ var useStyles = (0, _styles.makeStyles)(function (theme) {
   return {
     container: {
       width: "100%",
-      height: 700,
-      position: "absolute",
-      top: 0,
-      left: 0,
+      maxWidth: '100%',
+      height: 760,
+      padding: 0,
       margin: "0 auto;",
       backgroundColor: 'grey'
     },
@@ -44803,7 +45411,6 @@ var useStyles = (0, _styles.makeStyles)(function (theme) {
       position: "absolute",
       top: 24,
       right: 24,
-      fontFamily: "'Fredoka One', cursive;",
       paddingLeft: 29,
       paddingRight: 29
     }
@@ -44814,7 +45421,7 @@ var ParallaxHero = function ParallaxHero() {
   var classes = useStyles();
   return _react.default.createElement(_Container.default, {
     className: classes.container
-  }, _react.default.createElement(_Button.default, {
+  }, _react.default.createElement(_Parallax.default, null), _react.default.createElement(_Button.default, {
     className: classes.loginButton,
     variant: "contained",
     color: "primary"
@@ -44823,7 +45430,7 @@ var ParallaxHero = function ParallaxHero() {
 
 var _default = ParallaxHero;
 exports.default = _default;
-},{"react":"node_modules/react/index.js","@material-ui/core/Container":"node_modules/@material-ui/core/esm/Container/index.js","@material-ui/core/Button":"node_modules/@material-ui/core/esm/Button/index.js","@material-ui/core/styles":"node_modules/@material-ui/core/esm/styles/index.js","./HeroOverlay":"src/components/HeroOverlay.js"}],"src/components/LandingPage.js":[function(require,module,exports) {
+},{"react":"node_modules/react/index.js","@material-ui/core/Container":"node_modules/@material-ui/core/esm/Container/index.js","@material-ui/core/Button":"node_modules/@material-ui/core/esm/Button/index.js","./Parallax":"src/components/Parallax.js","@material-ui/core/styles":"node_modules/@material-ui/core/esm/styles/index.js","./HeroOverlay":"src/components/HeroOverlay.js"}],"src/components/LandingPage.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -44839,6 +45446,8 @@ var _ParallaxHero = _interopRequireDefault(require("./ParallaxHero"));
 
 var _styles = require("@material-ui/core/styles");
 
+var _Parallax = _interopRequireDefault(require("./Parallax"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var useStyles = (0, _styles.makeStyles)(function (theme) {
@@ -44847,9 +45456,7 @@ var useStyles = (0, _styles.makeStyles)(function (theme) {
       width: '100%',
       minHeight: '100vh',
       maxHeight: '100%',
-      position: 'absolute',
-      top: 0,
-      left: 0,
+      maxWidth: '100%',
       margin: '0 auto;'
     }
   };
@@ -44857,17 +45464,15 @@ var useStyles = (0, _styles.makeStyles)(function (theme) {
 
 var LandingPage = function LandingPage() {
   var classes = useStyles();
-  return _react.default.createElement(_Container.default, {
-    className: classes.container
-  }, _react.default.createElement(_ParallaxHero.default, null));
+  return _react.default.createElement("div", null, _react.default.createElement(_ParallaxHero.default, null));
 };
 
 var _default = LandingPage;
 exports.default = _default;
-},{"react":"node_modules/react/index.js","@material-ui/core/Container":"node_modules/@material-ui/core/esm/Container/index.js","./ParallaxHero":"src/components/ParallaxHero.js","@material-ui/core/styles":"node_modules/@material-ui/core/esm/styles/index.js"}],"src/App.js":[function(require,module,exports) {
+},{"react":"node_modules/react/index.js","@material-ui/core/Container":"node_modules/@material-ui/core/esm/Container/index.js","./ParallaxHero":"src/components/ParallaxHero.js","@material-ui/core/styles":"node_modules/@material-ui/core/esm/styles/index.js","./Parallax":"src/components/Parallax.js"}],"src/App.js":[function(require,module,exports) {
 "use strict";
 
-var _react = _interopRequireWildcard(require("react"));
+var _react = _interopRequireDefault(require("react"));
 
 var _LandingPage = _interopRequireDefault(require("./components/LandingPage"));
 
@@ -44876,8 +45481,6 @@ var _styles = require("@material-ui/core/styles");
 var _reactDom = _interopRequireDefault(require("react-dom"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
 // import WidgetFallback from './components/WidgetFallback'
 var theme = (0, _styles.createMuiTheme)({
@@ -44942,7 +45545,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51560" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62495" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

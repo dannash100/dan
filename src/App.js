@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react'
+import React from 'react'
 import LandingPage from './components/LandingPage'
 import {createMuiTheme, MuiThemeProvider} from '@material-ui/core/styles'
 import ReactDOM from 'react-dom'
@@ -27,7 +27,7 @@ const theme = createMuiTheme({
   },
   typography: {
     useNextVariants: true,
-    fontFamily: "'Fredoka One', cursive;",
+    fontFamily: "'Fredoka One', cursive;"
   }
 })
 
