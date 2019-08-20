@@ -1,9 +1,9 @@
 import React from 'react'
-import Container from '@material-ui/core/Container'
 import ParallaxHero from './ParallaxHero'
+import Panel from './Panel'
 
 import { makeStyles } from '@material-ui/core/styles'
-import Parallax from './Parallax';
+
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -20,6 +20,7 @@ const LandingPage = () => {
   return (
     <div>
       <ParallaxHero/>
+      <Panel/>
     </div>
   )
 }

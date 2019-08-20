@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import LandingPage from './components/LandingPage'
 import {createMuiTheme, MuiThemeProvider} from '@material-ui/core/styles'
 import ReactDOM from 'react-dom'
@@ -38,12 +38,13 @@ const theme = createMuiTheme({
 
 
 const App = () => {
+  useEffect(() => {
+    document.body.style.margin = 0
+  }, [])
   return (
-    <div>
         <MuiThemeProvider theme={theme}>
             <LandingPage />
         </MuiThemeProvider>
-    </div>
   )
 }
 

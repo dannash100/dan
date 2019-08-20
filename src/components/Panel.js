@@ -1,26 +1,25 @@
 import React from "react";
 import Container from "@material-ui/core/Container";
-import Button from "@material-ui/core/Button";
-import Parallax from "./Parallax"
+import Typography from '@material-ui/core/Typography'
 
 import { makeStyles } from "@material-ui/core/styles";
-import HeroOverlay from "./HeroOverlay";
 
 const useStyles = makeStyles(theme => ({
   container: {
     width: "100%",
     maxWidth: '100%',
-    height: 700,
+    height: 500,
     padding: 0,
     margin: "0 auto;",
-    userSelect: 'none'
+    userSelect: 'none',
+    backgroundColor: '#FFF',
+    color: '#606672'
   },
-  loginButton: {
-    position: "absolute",
-    top: 24,
-    right: 24,
-    paddingLeft: 29,
-    paddingRight: 29
+  content: {
+
+  },
+  text: {
+      fontSize: '2.2em'
   }
 }));
 
@@ -28,15 +27,7 @@ const ParallaxHero = () => {
   const classes = useStyles();
   return (
     <Container className={classes.container}>
-      <Parallax/>
-      <Button
-        className={classes.loginButton}
-        variant="contained"
-        color="primary"
-      >
-        LOG IN
-      </Button>
-      <HeroOverlay/>
+        <Typography className={classes.text}>Gamefroot is the platform for kids to code games.</Typography>
     </Container>
   );
 };

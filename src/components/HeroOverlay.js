@@ -10,6 +10,7 @@ const useStyles = makeStyles(theme => ({
     textShadow: '1px 1px 2px #000;',
     color: '#FFFFFF',
     left: '50%',
+    width: '100%',
     transform: 'translateX(-50%)',
     position: 'absolute',
     top: 380,
@@ -18,32 +19,34 @@ const useStyles = makeStyles(theme => ({
   startButton: {
     backgroundColor: theme.palette.success,
     position: 'absolute',
-    top: 600,
     left: '50%',
-    padding: '16px 48px;',
+    padding: '14px 48px;',
     fontSize: 29,
     fontFamily: "'Fredoka One', cursive;",
     color: '#FFFFFF',
     transform: 'translateX(-50%)',
-    boxShadow: '0 4px 10px 0 rgba(0,0,0,.16), 0 2px 20px 0 rgba(0,0,0,.1)'
+    boxShadow: '0 4px 10px 0 rgba(0,0,0,.16), 0 2px 20px 0 rgba(0,0,0,.1)',
+    '&:hover': {
+      backgroundColor: theme.palette.success
+    }
   },
   heroText: {
     fontSize: '4.2rem',
-    marginBottom: 25.5
+    marginBottom: 10
   },
   heroTextSmall: {
     fontSize: '1.6rem',
     fontFamily: "'Roboto', sans-serif;",
     fontWeight: 300,
-    marginBottom: 25.5
+    marginBottom: 35
   }
 }))
 
 const HeroOverlay = () => {
   const classes = useStyles()
   return (
-    <div>
     <div className={classes.root}>
+    <div>
       <Typography className={classes.heroText}>Game dev made easy</Typography>
       <Typography className={classes.heroTextSmall}>The most engaging way to learn code and game design</Typography>
     </div>

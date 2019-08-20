@@ -44965,8 +44965,24 @@ var process = require("process");
     }]
   }, {}, [5])(5);
 });
-},{"process":"node_modules/process/browser.js"}],"src/images/parallax/bg.jpg":[function(require,module,exports) {
+},{"process":"node_modules/process/browser.js"}],"src/images/parallax/p-cloud.png":[function(require,module,exports) {
+module.exports = "/p-cloud.1ff86fd1.png";
+},{}],"src/images/parallax/p-coins.png":[function(require,module,exports) {
+module.exports = "/p-coins.9cec6146.png";
+},{}],"src/images/parallax/p-girl.png":[function(require,module,exports) {
+module.exports = "/p-girl.60da724c.png";
+},{}],"src/images/parallax/p-grass.png":[function(require,module,exports) {
+module.exports = "/p-grass.cc58bf8c.png";
+},{}],"src/images/parallax/m-girl.png":[function(require,module,exports) {
+module.exports = "/m-girl.a9f02107.png";
+},{}],"src/images/parallax/m-cloud.png":[function(require,module,exports) {
+module.exports = "/m-cloud.0435a551.png";
+},{}],"src/images/parallax/m-post.png":[function(require,module,exports) {
+module.exports = "/m-post.9eabb742.png";
+},{}],"src/images/parallax/bg.jpg":[function(require,module,exports) {
 module.exports = "/bg.cdafc6f5.jpg";
+},{}],"src/images/parallax/break.png":[function(require,module,exports) {
+module.exports = "/break.f0d8b264.png";
 },{}],"src/components/Parallax.js":[function(require,module,exports) {
 "use strict";
 
@@ -44975,25 +44991,99 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _react = _interopRequireDefault(require("react"));
+var _react = _interopRequireWildcard(require("react"));
 
 var _parallaxJs = _interopRequireDefault(require("parallax-js"));
 
 var _styles = require("@material-ui/core/styles");
 
+var _pCloud = _interopRequireDefault(require("../images/parallax/p-cloud.png"));
+
+var _pCoins = _interopRequireDefault(require("../images/parallax/p-coins.png"));
+
+var _pGirl = _interopRequireDefault(require("../images/parallax/p-girl.png"));
+
+var _pGrass = _interopRequireDefault(require("../images/parallax/p-grass.png"));
+
+var _mGirl = _interopRequireDefault(require("../images/parallax/m-girl.png"));
+
+var _mCloud = _interopRequireDefault(require("../images/parallax/m-cloud.png"));
+
+var _mPost = _interopRequireDefault(require("../images/parallax/m-post.png"));
+
 var _bg = _interopRequireDefault(require("../images/parallax/bg.jpg"));
+
+var _break = _interopRequireDefault(require("../images/parallax/break.png"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+
 var useStyles = (0, _styles.makeStyles)(function (theme) {
   return {
+    container: {
+      overflow: 'hidden',
+      width: '100%',
+      height: 700,
+      marginBlockStart: 0,
+      marginBlockEnd: 0
+    },
+    mGirl: {
+      position: 'absolute',
+      top: 60,
+      left: '35%'
+    },
+    mCloud: {
+      position: 'absolute',
+      display: 'block'
+    },
+    mPost: {
+      position: 'absolute',
+      display: 'block',
+      left: '5%',
+      top: 360
+    },
+    pCloud: {
+      position: 'absolute',
+      left: '75%',
+      top: 0,
+      WebkitFilter: 'drop-shadow(20px 15px 3px rgba(0,0,0,.3))'
+    },
+    pCoins: {
+      position: 'absolute',
+      left: '86%',
+      top: 350,
+      WebkitFilter: 'drop-shadow(20px 15px 3px rgba(0,0,0,.3))'
+    },
+    pGirl: {
+      position: 'absolute',
+      top: 60,
+      left: '50%',
+      WebkitFilter: 'drop-shadow(20px 15px 3px rgba(0,0,0,.3))'
+    },
+    pGrass: {
+      position: 'absolute',
+      left: '60%',
+      top: 500,
+      WebkitFilter: 'drop-shadow(20px 15px 3px rgba(0,0,0,.3))'
+    },
     bg: {
-      width: "100%",
-      maxWidth: '100%',
-      height: 760,
+      position: 'absolute',
+      width: "200%",
+      maxWidth: '200%',
+      left: '-50%',
+      top: -350,
       padding: 0,
-      margin: "0 auto;",
-      backgroundColor: 'grey'
+      margin: "0 auto;"
+    },
+    separator: {
+      position: 'absolute',
+      left: '50%;',
+      marginLeft: '-70px;',
+      top: -140
+    },
+    layer: {
+      right: 0
     }
   };
 });
@@ -45001,16 +45091,70 @@ var useStyles = (0, _styles.makeStyles)(function (theme) {
 var ParallaxImage = function ParallaxImage() {
   var classes = useStyles();
   return _react.default.createElement("div", {
-    id: "splash"
-  }, _react.default.createElement("div", null, _react.default.createElement("img", {
+    ref: function ref(el) {
+      return new _parallaxJs.default(el);
+    },
+    className: classes.container
+  }, _react.default.createElement("div", {
+    className: classes.layer,
+    "data-depth": "0.10"
+  }, _react.default.createElement("img", {
     className: classes.bg,
     src: _bg.default
+  })), _react.default.createElement("div", {
+    className: classes.layer,
+    "data-depth": "0.20"
+  }, _react.default.createElement("img", {
+    className: classes.mCloud,
+    src: _mCloud.default
+  })), _react.default.createElement("div", {
+    className: classes.layer,
+    "data-depth": "0.40"
+  }, _react.default.createElement("img", {
+    className: classes.mPost,
+    src: _mPost.default
+  })), _react.default.createElement("div", {
+    className: classes.layer,
+    "data-depth": "0.60"
+  }, _react.default.createElement("img", {
+    className: classes.mGirl,
+    src: _mGirl.default
+  })), _react.default.createElement("div", {
+    className: classes.layer,
+    "data-depth": "0.60"
+  }, _react.default.createElement("img", {
+    className: classes.pGirl,
+    src: _pGirl.default
+  })), _react.default.createElement("div", {
+    className: classes.layer,
+    "data-depth": "0.40"
+  }, _react.default.createElement("img", {
+    className: classes.pCloud,
+    src: _pCloud.default
+  })), _react.default.createElement("div", {
+    className: classes.layer,
+    "data-depth": "0.20"
+  }, _react.default.createElement("img", {
+    className: classes.pCoins,
+    src: _pCoins.default
+  })), _react.default.createElement("div", {
+    className: classes.layer,
+    "data-depth": "1.00"
+  }, _react.default.createElement("img", {
+    className: classes.pGrass,
+    src: _pGrass.default
+  })), _react.default.createElement("div", {
+    className: classes.layer,
+    "data-depth": "0.55"
+  }, _react.default.createElement("img", {
+    className: classes.separator,
+    src: _break.default
   })));
 };
 
 var _default = ParallaxImage;
 exports.default = _default;
-},{"react":"node_modules/react/index.js","parallax-js":"node_modules/parallax-js/dist/parallax.js","@material-ui/core/styles":"node_modules/@material-ui/core/esm/styles/index.js","../images/parallax/bg.jpg":"src/images/parallax/bg.jpg"}],"node_modules/@material-ui/core/esm/Typography/Typography.js":[function(require,module,exports) {
+},{"react":"node_modules/react/index.js","parallax-js":"node_modules/parallax-js/dist/parallax.js","@material-ui/core/styles":"node_modules/@material-ui/core/esm/styles/index.js","../images/parallax/p-cloud.png":"src/images/parallax/p-cloud.png","../images/parallax/p-coins.png":"src/images/parallax/p-coins.png","../images/parallax/p-girl.png":"src/images/parallax/p-girl.png","../images/parallax/p-grass.png":"src/images/parallax/p-grass.png","../images/parallax/m-girl.png":"src/images/parallax/m-girl.png","../images/parallax/m-cloud.png":"src/images/parallax/m-cloud.png","../images/parallax/m-post.png":"src/images/parallax/m-post.png","../images/parallax/bg.jpg":"src/images/parallax/bg.jpg","../images/parallax/break.png":"src/images/parallax/break.png"}],"node_modules/@material-ui/core/esm/Typography/Typography.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -45329,6 +45473,7 @@ var useStyles = (0, _styles.makeStyles)(function (theme) {
       textShadow: '1px 1px 2px #000;',
       color: '#FFFFFF',
       left: '50%',
+      width: '100%',
       transform: 'translateX(-50%)',
       position: 'absolute',
       top: 380,
@@ -45337,33 +45482,35 @@ var useStyles = (0, _styles.makeStyles)(function (theme) {
     startButton: {
       backgroundColor: theme.palette.success,
       position: 'absolute',
-      top: 600,
       left: '50%',
-      padding: '16px 48px;',
+      padding: '14px 48px;',
       fontSize: 29,
       fontFamily: "'Fredoka One', cursive;",
       color: '#FFFFFF',
       transform: 'translateX(-50%)',
-      boxShadow: '0 4px 10px 0 rgba(0,0,0,.16), 0 2px 20px 0 rgba(0,0,0,.1)'
+      boxShadow: '0 4px 10px 0 rgba(0,0,0,.16), 0 2px 20px 0 rgba(0,0,0,.1)',
+      '&:hover': {
+        backgroundColor: theme.palette.success
+      }
     },
     heroText: {
       fontSize: '4.2rem',
-      marginBottom: 25.5
+      marginBottom: 10
     },
     heroTextSmall: {
       fontSize: '1.6rem',
       fontFamily: "'Roboto', sans-serif;",
       fontWeight: 300,
-      marginBottom: 25.5
+      marginBottom: 35
     }
   };
 });
 
 var HeroOverlay = function HeroOverlay() {
   var classes = useStyles();
-  return _react.default.createElement("div", null, _react.default.createElement("div", {
+  return _react.default.createElement("div", {
     className: classes.root
-  }, _react.default.createElement(_Typography.default, {
+  }, _react.default.createElement("div", null, _react.default.createElement(_Typography.default, {
     className: classes.heroText
   }, "Game dev made easy"), _react.default.createElement(_Typography.default, {
     className: classes.heroTextSmall
@@ -45402,10 +45549,10 @@ var useStyles = (0, _styles.makeStyles)(function (theme) {
     container: {
       width: "100%",
       maxWidth: '100%',
-      height: 760,
+      height: 700,
       padding: 0,
       margin: "0 auto;",
-      backgroundColor: 'grey'
+      userSelect: 'none'
     },
     loginButton: {
       position: "absolute",
@@ -45430,7 +45577,7 @@ var ParallaxHero = function ParallaxHero() {
 
 var _default = ParallaxHero;
 exports.default = _default;
-},{"react":"node_modules/react/index.js","@material-ui/core/Container":"node_modules/@material-ui/core/esm/Container/index.js","@material-ui/core/Button":"node_modules/@material-ui/core/esm/Button/index.js","./Parallax":"src/components/Parallax.js","@material-ui/core/styles":"node_modules/@material-ui/core/esm/styles/index.js","./HeroOverlay":"src/components/HeroOverlay.js"}],"src/components/LandingPage.js":[function(require,module,exports) {
+},{"react":"node_modules/react/index.js","@material-ui/core/Container":"node_modules/@material-ui/core/esm/Container/index.js","@material-ui/core/Button":"node_modules/@material-ui/core/esm/Button/index.js","./Parallax":"src/components/Parallax.js","@material-ui/core/styles":"node_modules/@material-ui/core/esm/styles/index.js","./HeroOverlay":"src/components/HeroOverlay.js"}],"src/components/Panel.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -45442,11 +45589,57 @@ var _react = _interopRequireDefault(require("react"));
 
 var _Container = _interopRequireDefault(require("@material-ui/core/Container"));
 
-var _ParallaxHero = _interopRequireDefault(require("./ParallaxHero"));
+var _Typography = _interopRequireDefault(require("@material-ui/core/Typography"));
 
 var _styles = require("@material-ui/core/styles");
 
-var _Parallax = _interopRequireDefault(require("./Parallax"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var useStyles = (0, _styles.makeStyles)(function (theme) {
+  return {
+    container: {
+      width: "100%",
+      maxWidth: '100%',
+      height: 500,
+      padding: 0,
+      margin: "0 auto;",
+      userSelect: 'none',
+      backgroundColor: '#FFF',
+      color: '#606672'
+    },
+    content: {},
+    text: {
+      fontSize: '2.2em'
+    }
+  };
+});
+
+var ParallaxHero = function ParallaxHero() {
+  var classes = useStyles();
+  return _react.default.createElement(_Container.default, {
+    className: classes.container
+  }, _react.default.createElement(_Typography.default, {
+    className: classes.text
+  }, "Gamefroot is the platform for kids to code games."));
+};
+
+var _default = ParallaxHero;
+exports.default = _default;
+},{"react":"node_modules/react/index.js","@material-ui/core/Container":"node_modules/@material-ui/core/esm/Container/index.js","@material-ui/core/Typography":"node_modules/@material-ui/core/esm/Typography/index.js","@material-ui/core/styles":"node_modules/@material-ui/core/esm/styles/index.js"}],"src/components/LandingPage.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+var _ParallaxHero = _interopRequireDefault(require("./ParallaxHero"));
+
+var _Panel = _interopRequireDefault(require("./Panel"));
+
+var _styles = require("@material-ui/core/styles");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -45464,15 +45657,15 @@ var useStyles = (0, _styles.makeStyles)(function (theme) {
 
 var LandingPage = function LandingPage() {
   var classes = useStyles();
-  return _react.default.createElement("div", null, _react.default.createElement(_ParallaxHero.default, null));
+  return _react.default.createElement("div", null, _react.default.createElement(_ParallaxHero.default, null), _react.default.createElement(_Panel.default, null));
 };
 
 var _default = LandingPage;
 exports.default = _default;
-},{"react":"node_modules/react/index.js","@material-ui/core/Container":"node_modules/@material-ui/core/esm/Container/index.js","./ParallaxHero":"src/components/ParallaxHero.js","@material-ui/core/styles":"node_modules/@material-ui/core/esm/styles/index.js","./Parallax":"src/components/Parallax.js"}],"src/App.js":[function(require,module,exports) {
+},{"react":"node_modules/react/index.js","./ParallaxHero":"src/components/ParallaxHero.js","./Panel":"src/components/Panel.js","@material-ui/core/styles":"node_modules/@material-ui/core/esm/styles/index.js"}],"src/App.js":[function(require,module,exports) {
 "use strict";
 
-var _react = _interopRequireDefault(require("react"));
+var _react = _interopRequireWildcard(require("react"));
 
 var _LandingPage = _interopRequireDefault(require("./components/LandingPage"));
 
@@ -45481,6 +45674,8 @@ var _styles = require("@material-ui/core/styles");
 var _reactDom = _interopRequireDefault(require("react-dom"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
 // import WidgetFallback from './components/WidgetFallback'
 var theme = (0, _styles.createMuiTheme)({
@@ -45511,9 +45706,12 @@ var theme = (0, _styles.createMuiTheme)({
 // export const useUserStore = () => useContext(userContext)
 
 var App = function App() {
-  return _react.default.createElement("div", null, _react.default.createElement(_styles.MuiThemeProvider, {
+  (0, _react.useEffect)(function () {
+    document.body.style.margin = 0;
+  }, []);
+  return _react.default.createElement(_styles.MuiThemeProvider, {
     theme: theme
-  }, _react.default.createElement(_LandingPage.default, null)));
+  }, _react.default.createElement(_LandingPage.default, null));
 };
 
 _reactDom.default.render(_react.default.createElement(App, null), document.getElementById('root'));
@@ -45545,7 +45743,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62495" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50654" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
